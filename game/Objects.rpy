@@ -41,14 +41,15 @@ init -1 python:
             self.maxHP = maxHP
             self.currHP = currHP
             self.pAtk = pAtk
-            self.currPAtk = pAtk
+            self.currPAtk = copy.deepcopy(pAtk)
             self.sAtk = sAtk
-            self.currSAtk = sAtk
+            self.currSAtk = copy.deepcopy(sAtk)
             self.pDef = pDef
-            self.currPDef = pDef
+            self.currPDef = copy.deepcopy(pDef)
             self.sDef = sDef
-            self.currSDef = sDef
+            self.currSDef = copy.deepcopy(sDef)
             self.speed = speed
+            self.currSpeed = copy.deepcopy(speed)
             self.status = status
             self.moves = []
             self.dmgMod = 1
@@ -80,7 +81,7 @@ init -1 python:
             elif type == 3:
                 self.currHP += 200
             if self.currHP > self.maxHP:
-                self.currHP = self.maxHP
+                self.currHP = copy.deepcopy(self.maxHP)
 
         # Determines and calculates type advantages
         def getTypeAdvantage(self, move, target):
@@ -165,6 +166,8 @@ init -1 python:
                 #print("%d/%d" % (target.currHP, target.maxHP))
             # Checks if move just causes an effect
             elif move.damage == 0:
+                self.isCrit = False
+                self.dmgMod = 0
                 move.determineEffect(target)
 
     class Moves(object):
@@ -182,7 +185,6 @@ init -1 python:
             if self.effect == 1:
                 if target.currPDef > target.pDef - 6:
                     target.currPDef -= 1
-                    return "You lowered your opponents defense!"
                     #print("You lowered your opponents defense!")
                 else:
                     return "You can't lower your opponents defense anymore!"

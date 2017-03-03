@@ -2,8 +2,8 @@
 errors listed below, and try again.
 
 
-File "game/combatsystem.rpy", line 95: expected statement.
-    pokeImagePath = "images/" + Red.party[currPoke].name + ".png"
-                  ^
+File "game/combatsystem.rpy", line 264: expected statement.
+    Blue.party[eCurrPoke].attack(skill, target)
+                                               ^
 
 Ren'Py Version: Ren'Py 6.99.12.3.2123

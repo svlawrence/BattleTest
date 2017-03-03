@@ -1,13 +1,10 @@
 init 1 python:
-    #import Objects
-    #from random import randint
-    #from random import uniform
     
     #Declarations. Ideally you would set these early in the game. Not completely done.
     Tackle = Moves("Tackle", 35, 0, 0, 35, 100, 0)
     Tail_Whip = Moves("Tail Whip", 35, 0, 0, 0, 100, 1)
-    Charmander = Pokemon("Charmander", 1, 18, 10, 21, 21, 11, 13, 11, 13, 11, 0)
-    Bulbasaur = Pokemon("Bulbasaur", 4, 18, 10, 21, 21, 11, 13, 11, 13, 11, 0)
+    Charmander = Pokemon("Charmander", 1, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0)
+    Bulbasaur = Pokemon("Bulbasaur", 4, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0)
     Squirtle = Pokemon("Squirtle", 2, 18, 5, 20, 20, 11, 11, 13, 12, 10, 0)
     Red = Trainer("Red", 1)
     Blue = Trainer("Blue", 2)
@@ -27,7 +24,7 @@ init 1 python:
  
     def stats_frame(name, level, hp, maxhp, **properties):
 
-        ui.frame(xfill=False, yminimum=None, **properties)
+        ui.frame(xfill=False, xpadding=100, yminimum=None, **properties)
 
         ui.hbox() # (name, "HP", bar) from (level, hp, maxhp)
         ui.vbox() # name from ("HP", bar)
@@ -87,7 +84,7 @@ label pokemon:
     
     if pauseGame:
         $ pauseGame = False
-        jump Pokemon
+    #    jump pokemon
     else:
         $ php = Red.party[currPoke].currHP
         $ ehp = Blue.party[currPoke].currHP
@@ -131,6 +128,8 @@ label battle:
     $ combat_turn += 1
     $ skillChoice = len(Red.party[currPoke].moves)
     $ numSkill = 0
+    $ speedTest = Red.party[currPoke].checkSpeed(Blue.party[eCurrPoke])
+    $ print(speedTest)
     
     python:
         if skillChoice >= 1:
@@ -156,9 +155,12 @@ label battle:
                     $ numSkill = 3
                 "[skill4_name]" if skillChoice >= 4:
                     $ numSkill = 4
-                     
-            jump use_skill
+            if speedTest == True:
+                jump playerAttack
+            elif speedTest == False:
+                jump enemyAttack
                  
+           
 label use_skill:
     call fight
     if numSkill == 1:
@@ -167,30 +169,110 @@ label use_skill:
     elif numSkill == 2:
         "[pname] used [skill2_name]!"
         $ Red.party[currPoke].attack(Red.party[currPoke].moves[1], Blue.party[currPoke])
+        
+    if Red.party[currPoke].moves[numSkill - 1].effect == 1:
+        call fight
+        if Blue.party[currPoke].currPDef > Blue.party[currPoke].pDef - 6:
+            "You lowered your opponents defense!"
+        elif Blue.party[currPoke].currPDef == Blue.party[currPoke].pDef - 6:
+            "You can't lower your opponents defense anymore!"
 
     if Red.party[currPoke].isCrit == True:
-        call pokemon
+        call fight
         "Critical strike!"
     if Red.party[currPoke].dmgMod > 1:
-        call pokemon
+        call fight
         "It's super effective!"
 
         
-    $ checkEHP = Blue.party[currPoke].currHP    
-    if checkEHP <= 0:
-        $ ehp = 0
-        call fight
-        "Enemy [ename] fainted!"
-        call enemyHideImage
-        scene black with dissolve
-        centered "You win!"
-        $ renpy.full_restart()
+    #$ checkEHP = Blue.party[currPoke].currHP    
+    #if checkEHP <= 0:
+    #    $ ehp = 0
+    #    call fight
+    #    "Enemy [ename] fainted!"
+    #    call enemyHideImage
+    #    call e_defeat
         
-    call pokemon    
-    jump battle
-    
+    call pokemon
+
 label hideImage:
     hide playerPokemon
 
 label enemyHideImage:
     hide enemyPokemon
+    
+label e_defeat:
+     scene black with dissolve
+     centered "You win!"
+     $ renpy.full_restart()
+
+label p_defeat:
+     scene black with dissolve
+     centered "You lose!"
+     $ renpy.full_restart()     
+     
+label playerAttack:
+    call fight
+    if numSkill == 1:
+        "[pname] used [skill1_name]!"
+        $ Red.party[currPoke].attack(Red.party[currPoke].moves[0], Blue.party[eCurrPoke])
+    elif numSkill == 2:
+        "[pname] used [skill2_name]!"
+        $ Red.party[currPoke].attack(Red.party[currPoke].moves[1], Blue.party[eCurrPoke])
+        
+    if Red.party[currPoke].moves[numSkill - 1].effect == 1:
+        call fight
+        if Blue.party[currPoke].currPDef > Blue.party[currPoke].pDef - 6:
+            "You lowered your opponents defense!"
+        elif Blue.party[currPoke].currPDef == Blue.party[currPoke].pDef - 6:
+            "You can't lower your opponents defense anymore!"
+
+    if Red.party[currPoke].isCrit == True:
+        call fight
+        "Critical strike!"
+    if Red.party[currPoke].dmgMod > 1:
+        call fight
+        "It's super effective!"
+
+        
+    $ checkEHP = Blue.party[eCurrPoke].currHP    
+    if checkEHP <= 0:
+        $ ehp = 0
+        call fight
+        "Enemy [ename] fainted!"
+        hide enemyPokemon
+        call e_defeat
+        
+    if speedTest == True:
+        jump enemyAttack
+    elif speedTest == False:
+        call pokemon
+        jump battle
+        
+label enemyAttack:
+    call fight
+    
+    $ numMoves = len(Blue.party[eCurrPoke].moves) - 1
+    $ pickedMove = randint(0, numMoves)
+    $ skill = Blue.party[eCurrPoke].moves[pickedMove]
+    $ skill_name = Blue.party[eCurrPoke].moves[pickedMove].name
+    $ poke_name = Blue.party[eCurrPoke].name
+    $ target = Red.party[currPoke]
+    $ target_name = target.name
+    
+    "[poke_name] used [skill_name]!"
+    $ Blue.party[eCurrPoke].attack(skill, target)
+        
+    $ checkPHP = Red.party[currPoke].currHP    
+    if checkPHP <= 0:
+        $ php = 0
+        call fight
+        "[target_name] fainted!"
+        hide playerPokemon
+        call p_defeat
+        
+    if speedTest == True:
+        call pokemon
+        jump battle
+    elif speedTest == False:
+        jump playerAttack

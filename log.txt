@@ -1,16 +1,16 @@
-Thu Mar 02 13:14:34 2017
+Fri Mar 03 01:03:59 2017
 Windows-8-6.2.9200
 Ren'Py 6.99.12.3.2123
  
 
-Bootstrap to the start of init.init took 0.07s
-Early init took 0.01s
+Bootstrap to the start of init.init took 0.08s
+Early init took 0.02s
 Loader init took 0.02s
 Loading error handling took 0.02s
-Loading script took 0.08s
+Loading script took 0.09s
 Loading persistent took 0.01s
 Importing _renpysteam: ImportError('No module named _renpysteam',)
-Running init code took 0.09s
+Running init code took 0.10s
 Loading analysis data took 0.01s
 Analyze and compile ATL took 0.00s
 Index archives took 0.00s
@@ -21,8 +21,8 @@ DPI scale factor: 1.000000
 Creating interface object took 0.03s
 Cleaning stores took 0.00s
 Init translation took 0.04s
-Build styles took 0.00s
-Load screen analysis took 0.03s
+Build styles took 0.01s
+Load screen analysis took 0.02s
 Analyze screens took 0.00s
 Save screen analysis took 0.00s
 Prepare screens took 0.04s
@@ -34,7 +34,7 @@ Interface start took 0.01s
 
 primary display bounds: (0, 0, 1920, 1080)
 Windowed mode.
-Screen sizes: virtual=(1280, 720) physical=(1739, 978) drawable=(1739, 978)
+Screen sizes: virtual=(1280, 720) physical=(1698, 955) drawable=(1698, 955)
 Vendor: 'Intel'
 Renderer: 'Intel(R) HD Graphics 530'
 Version: '4.4.0 - Build 21.20.16.4550'
@@ -264,17 +264,17 @@ Texture testing:
 - 512px textures work.
 - 1024px textures work.
 - 2048px textures work.
-Total time until interface ready: 0.932000160217s
+Total time until interface ready: 0.927999973297s
 - Target is 5 frames in 0.333333333333 seconds.
 - Frame drawn at 0.000000 seconds.
-- Frame drawn at 0.012000 seconds.
+- Frame drawn at 0.013000 seconds.
 - Frame drawn at 0.031000 seconds.
-- Frame drawn at 0.048000 seconds.
-- Frame drawn at 0.065000 seconds.
-- 0.065000 seconds to render 5 frames.
+- Frame drawn at 0.049000 seconds.
+- Frame drawn at 0.063000 seconds.
+- 0.063000 seconds to render 5 frames.
 Cleaning stores took 0.00s
-Init translation took 0.12s
-Build styles took 0.01s
+Init translation took 0.11s
+Build styles took 0.03s
 Load screen analysis took 0.01s
 Analyze screens took 0.00s
 Prepare screens took 0.00s

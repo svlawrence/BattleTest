@@ -4,24 +4,27 @@ init 1 python:
     #from random import uniform
     
     #Declarations. Ideally you would set these early in the game. Not completely done.
-    Move1 = Moves("Tackle", 35, 0, 0, 35, 100, 0)
-    Move2 = Moves("Tail Whip", 35, 0, 0, 0, 100, 1)
-    Poke1 = Pokemon("Bulbasaur", 4, 18, 10, 21, 21, 11, 13, 11, 13, 11, 0)
-    Poke2 = Pokemon("Squirtle", 2, 18, 5, 20, 20, 11, 11, 13, 12, 10, 0)
-    Poke3 = Pokemon("Bulbasaur", 4, 18, 10, 21, 21, 11, 13, 11, 13, 11, 0)
-    Poke4 = Pokemon("Squirtle", 2, 18, 5, 20, 20, 11, 11, 13, 12, 10, 0)
+    Tackle = Moves("Tackle", 35, 0, 0, 35, 100, 0)
+    Tail_Whip = Moves("Tail Whip", 35, 0, 0, 0, 100, 1)
+    Charmander = Pokemon("Charmander", 1, 18, 10, 21, 21, 11, 13, 11, 13, 11, 0)
+    Bulbasaur = Pokemon("Bulbasaur", 4, 18, 10, 21, 21, 11, 13, 11, 13, 11, 0)
+    Squirtle = Pokemon("Squirtle", 2, 18, 5, 20, 20, 11, 11, 13, 12, 10, 0)
     Red = Trainer("Red", 1)
     Blue = Trainer("Blue", 2)
     
-    Red.catchMember(Poke1)
-    Red.catchMember(Poke2)
+    Red.catchMember(Charmander)
+    Blue.catchMember(Squirtle)
+
     
-    Blue.catchMember(Poke3)
-    Blue.catchMember(Poke4)
+    Red.party[0].addMove(Tackle)
+    Red.party[0].addMove(Tail_Whip)
+    Blue.party[0].addMove(Tackle)
+    Blue.party[0].addMove(Tail_Whip)
     
     numPoke = Red.numPoke()
-  
-    Poke2.currHP = Poke2.currHP
+    
+    eCurrPoke = 0
+ 
     def stats_frame(name, level, hp, maxhp, **properties):
 
         ui.frame(xfill=False, yminimum=None, **properties)
@@ -84,33 +87,60 @@ label pokemon:
     
     if pauseGame:
         $ pauseGame = False
-        jump Pokemon
+    #    jump pokemon
     else:
         $ php = Red.party[currPoke].currHP
-        $ ehp = Poke2.currHP
+        $ ehp = Blue.party[currPoke].currHP
+        
+        $ pokeImagePath = "/images/" + Red.party[currPoke].name + ".png"
+        $ eImagePath = "/images/" + Blue.party[eCurrPoke].name + ".png"
+        
+        image playerPokemon:
+            xalign .02
+            yalign .02
+            xpos 15
+            ypos 180
+            pokeImagePath
+        show playerPokemon
+        
+        image enemyPokemon:
+            xalign .02
+            yalign .02
+            xpos 1000
+            ypos 180
+            eImagePath
+        show enemyPokemon
         
         if php != 0:
             $ pname = Red.party[currPoke].name
             $ plevel = Red.party[currPoke].lvl
             $ pmaxhp = Red.party[currPoke].maxHP
-            $ skill_1 = Move1.name
-            $ skill_2 = Move2.name
+            #$ skill_1 = Move1.name
+            #$ skill_2 = Move2.name
             
         if ehp != 0:
-            $ ename = Poke2.name
-            $ elevel = Poke2.lvl
-            $ emaxhp = Poke2.maxHP
+            $ ename = Blue.party[eCurrPoke].name
+            $ elevel = Blue.party[eCurrPoke].lvl
+            $ emaxhp = Blue.party[eCurrPoke].maxHP
             
-            $ skill_1 = Move1
-            $ skill_2 = Move2
+        #$ skill_1 = Red.party[currPoke].moves[0];
+        #$ skill_2 = Red.party[currPoke].moves[1];
             
 label battle:
     call fight
     $ combat_turn += 1
+    $ skillChoice = len(Red.party[currPoke].moves)
     $ numSkill = 0
     
-    $ skill1_name = skill_1.name
-    $ skill2_name = skill_2.name
+    python:
+        if skillChoice >= 1:
+             skill1_name = Red.party[currPoke].moves[0].name
+        if skillChoice >= 2:
+             skill2_name = Red.party[currPoke].moves[1].name
+        if skillChoice >= 3:
+             skill3_name = Red.party[currPoke].moves[2].name
+        if skillChoice >= 4:
+             skill4_name = Red.party[currPoke].moves[3].name
     
     menu:
         "What would you like to do?"
@@ -118,31 +148,57 @@ label battle:
             call fight
             menu:
                 "What should [pname] do?"
-                "[skill1_name]":
+                "[skill1_name]" if skillChoice >= 1:
                     $ numSkill = 1
-                "[skill2_name]":
-                     $ numSkill = 2
-                     
+                "[skill2_name]" if skillChoice >= 2:
+                    $ numSkill = 2
+                "[skill3_name]" if skillChoice >= 3:
+                    $ numSkill = 3
+                "[skill4_name]" if skillChoice >= 4:
+                    $ numSkill = 4
+                    
             jump use_skill
                  
 label use_skill:
     call fight
     if numSkill == 1:
         "[pname] used [skill1_name]!"
-        $ Red.party[currPoke].attack(Move1, Poke2)
+        $ Red.party[currPoke].attack(Red.party[currPoke].moves[0], Blue.party[currPoke])
     elif numSkill == 2:
         "[pname] used [skill2_name]!"
-        $ Red.party[currPoke].attack(Move2, Poke2)
+        $ Red.party[currPoke].attack(Red.party[currPoke].moves[1], Blue.party[currPoke])
     
-    $ checkEHP = Poke2.currHP    
+    if Red.party[currPoke].moves[numSkill - 1].effect == 1:
+        call fight
+        if Blue.party[currPoke].currPDef > Blue.party[currPoke].pDef - 6:
+            "You lowered your opponents defense!"
+        elif Blue.party[currPoke].currPDef == Blue.party[currPoke].pDef - 6:
+            "You can't lower your opponents defense anymore!"
+
+    if Red.party[currPoke].isCrit == True:
+        call fight
+        "Critical strike!"
+        
+    if Red.party[currPoke].dmgMod > 1:
+        call fight
+        "It's super effective!"
+        
+    $ checkEHP = Blue.party[currPoke].currHP    
     if checkEHP <= 0:
         $ ehp = 0
         call fight
         "Enemy [ename] fainted!"
-        scene black with dissolve
+        call enemyHideImage
+        #scene black with dissolve
         centered "You win!"
         $ renpy.full_restart()
         
     call pokemon    
     jump battle
-            
+    
+label hideImage:
+    hide playerPokemon
+
+label enemyHideImage:
+    hide enemyPokemon
+    

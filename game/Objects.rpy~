@@ -1,4 +1,4 @@
-init 0 python:
+init -1 python:
 
     from __future__ import division
     from random import randint
@@ -51,9 +51,11 @@ init 0 python:
             self.speed = speed
             self.status = status
             self.moves = []
+            self.dmgMod = 1
+            self.isCrit = False
 
         def addMove(self, move):
-            if len.moves < 4:
+            if len(self.moves) < 4:
                 self.moves.append(copy.deepcopy(move))
 
         # Checks pokemon speed to determine order
@@ -86,21 +88,21 @@ init 0 python:
             moveType = move.type
             targetType1 = pokemon_types.index(target.type1)
             targetType2 = pokemon_types.index(target.type2)
-            dmgMod = 1
+            self.dmgMod = 1
             battleDmg = battle_chart[moveType][targetType1]
-            dmgMod *= battleDmg
+            self.dmgMod *= battleDmg
             battleDmg = battle_chart[moveType][targetType2]
-            dmgMod *= battleDmg
+            self.dmgMod *= battleDmg
             #print("Move type is %s" % pokemon_types[move.type])
             #print("Target type is %s" % target.type1)
             #print("Target type is %s" % target.type2)
-            if(dmgMod > 1):
+            #if(dmgMod > 1):
                 #print("It's super effective!")
-            elif(dmgMod < 1):
+            #elif(dmgMod < 1):
                 #print("It's not very effective...")
             #print("%f" % dmgMod)
             #print("The move type is: %d")
-            return dmgMod
+            return self.dmgMod
 
         # If the move type is the same as one of the pokemon's two types, gives an additional damage multiplier
         def sameTypeBonus(self, move):
@@ -121,9 +123,11 @@ init 0 python:
             x = self.speed / 2
             chance = randint(0, 255)
             if x < chance:
+                self.isCrit = False
                 return 1
             elif x > chance or x > 255:
-                print("Critical strike!")
+                self.isCrit = True
+                #print("Critical strike!")
                 return 2
             
         # Function for attacking enemy. Uses a 1:1 formula with the actual Pokemon damage formula, making attacks
@@ -178,8 +182,10 @@ init 0 python:
             if self.effect == 1:
                 if target.currPDef > target.pDef - 6:
                     target.currPDef -= 1
+                    return "You lowered your opponents defense!"
                     #print("You lowered your opponents defense!")
                 else:
+                    return "You can't lower your opponents defense anymore!"
                     #print("You can't lower your opponents defense anymore!")
             elif self.effect == 2:
                 target.currPAtk -= 1
