@@ -196,13 +196,14 @@ init -1 python:
             elif self.effect == 4:
                 target.currSAtk -= 1
             elif self.effect == 5:
-                target.speed
+                target.currSpeed -= 1
 
     class Trainer(object):
-        def __init__(self, name, id):
+        def __init__(self, name, ID):
             self.name = name
-            self.id = id
+            self.ID = ID
             self.party = []
+            self.knockedOut = []
             self.storage = []
 
         def catchMember(self, Pokemon):
@@ -214,6 +215,10 @@ init -1 python:
 
         def numPoke(self):
             return len(self.party)
+        
+        def knockOut(self, i):
+            self.knockedOut.append(self.party[i])
+            self.party.pop(i)
 
         def withdraw(self, choice):
             if len(self.party) < 6:
@@ -225,7 +230,7 @@ init -1 python:
 
         def deposit(self, choice):
             if len(self.party) > 1:
-                self.storage.append(party.partyList[choice])
+                self.storage.append(party[choice])
                 self.party.pop(choice)
                 print("You have deposited a pokemon")
             else:

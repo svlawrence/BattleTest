@@ -3,38 +3,42 @@
 While running game code:
   File "game/script.rpy", line 9, in script call
     call combat
-  File "game/combatsystem.rpy", line 275, in script call
+  File "game/combatsystem.rpy", line 311, in script call
     call pokemon
-  File "game/combatsystem.rpy", line 275, in script call
+  File "game/combatsystem.rpy", line 311, in script call
     call pokemon
-  File "game/combatsystem.rpy", line 264, in script
-    $ Blue.party[eCurrPoke].attack(skill, target)
-  File "game/combatsystem.rpy", line 264, in <module>
-    $ Blue.party[eCurrPoke].attack(skill, target)
-  File "game/Objects.rpy", line 158, in attack
-    damage = round((((2 * (level + 10)) / 250) * (atk/defe) * move.damage + 2) * (bonus * typeMod * critical * randNum))
-TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'
+  File "game/combatsystem.rpy", line 311, in script call
+    call pokemon
+  File "game/combatsystem.rpy", line 248, in script call
+    call pokemon
+  File "game/combatsystem.rpy", line 96, in script
+    $ ehp = Blue.party[eCurrPoke].currHP
+  File "game/combatsystem.rpy", line 96, in <module>
+    $ ehp = Blue.party[eCurrPoke].currHP
+IndexError: list index out of range
 
 -- Full Traceback ------------------------------------------------------------
 
 Full traceback:
   File "game/script.rpy", line 9, in script call
     call combat
-  File "game/combatsystem.rpy", line 275, in script call
+  File "game/combatsystem.rpy", line 311, in script call
     call pokemon
-  File "game/combatsystem.rpy", line 275, in script call
+  File "game/combatsystem.rpy", line 311, in script call
     call pokemon
-  File "game/combatsystem.rpy", line 264, in script
-    $ Blue.party[eCurrPoke].attack(skill, target)
+  File "game/combatsystem.rpy", line 311, in script call
+    call pokemon
+  File "game/combatsystem.rpy", line 248, in script call
+    call pokemon
+  File "game/combatsystem.rpy", line 96, in script
+    $ ehp = Blue.party[eCurrPoke].currHP
   File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\ast.py", line 814, in execute
     renpy.python.py_exec_bytecode(self.code.bytecode, self.hide, store=self.store)
   File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\python.py", line 1715, in py_exec_bytecode
     exec bytecode in globals, locals
-  File "game/combatsystem.rpy", line 264, in <module>
-    $ Blue.party[eCurrPoke].attack(skill, target)
-  File "game/Objects.rpy", line 158, in attack
-    damage = round((((2 * (level + 10)) / 250) * (atk/defe) * move.damage + 2) * (bonus * typeMod * critical * randNum))
-TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'
+  File "game/combatsystem.rpy", line 96, in <module>
+    $ ehp = Blue.party[eCurrPoke].currHP
+IndexError: list index out of range
 
 Windows-8-6.2.9200
 Ren'Py 6.99.12.3.2123
