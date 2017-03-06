@@ -9,12 +9,13 @@ init 1 python:
     Red = Trainer("Red", 1)
     Blue = Trainer("Blue", 2)
     
+    # Catching members. Ignore for now
     Red.catchMember(Charmander)
     Red.catchMember(Squirtle)
     Blue.catchMember(Squirtle)
     Blue.catchMember(Charmander)
 
-    
+    # Giving pokemon moves
     Red.party[0].addMove(Tackle)
     Red.party[0].addMove(Tail_Whip)
     Red.party[1].addMove(Tackle)
@@ -24,8 +25,10 @@ init 1 python:
     Blue.party[1].addMove(Tackle)
     Blue.party[1].addMove(Tail_Whip)
     
+    # Number of pokemon in Red's party.
     numPoke = Red.numPoke()
     
+    # Setting index for Blue's pokemon
     eCurrPoke = 0
  
     def stats_frame(name, level, hp, maxhp, **properties):
@@ -52,14 +55,9 @@ init 1 python:
 
         ui.close()
         ui.close()
-init:
-    $ combat_turn = 0
-    
-    $ pauseGame = False
-    
+    combat_turn = 0
+ 
 label combat:
-    $ iter = 0
-
     if combat_turn == 0:
         menu:
             "Choose your Pokemon:"
@@ -77,6 +75,7 @@ label combat:
                 $ currPoke = 5
         jump pokemon
 
+# Frame update
 label fight:
 
     # Player Stats Frame
@@ -86,43 +85,38 @@ label fight:
     $ stats_frame(ename, elevel, ehp, emaxhp, xalign=.98, yalign=.7)
     return
         
+# Pokemon update label
 label pokemon:
+    $ php = Red.party[currPoke].currHP
+    $ ehp = Blue.party[eCurrPoke].currHP
+    $ pokeImagePath = "/images/" + Red.party[currPoke].name + ".png"
+    $ eImagePath = "/images/" + Blue.party[eCurrPoke].name + ".png"
     
-    if pauseGame:
-        $ pauseGame = False
-    #    jump pokemon
-    else:
-        $ php = Red.party[currPoke].currHP
-        $ ehp = Blue.party[eCurrPoke].currHP
+    image playerPokemon:
+        xalign .02
+        yalign .02
+        xpos 15
+        ypos 180
+        pokeImagePath
+    show playerPokemon
         
-        $ pokeImagePath = "/images/" + Red.party[currPoke].name + ".png"
-        $ eImagePath = "/images/" + Blue.party[eCurrPoke].name + ".png"
+    image enemyPokemon:
+        xalign .02
+        yalign .02
+        xpos 1000
+        ypos 180
+        eImagePath
+    show enemyPokemon
         
-        image playerPokemon:
-            xalign .02
-            yalign .02
-            xpos 15
-            ypos 180
-            pokeImagePath
-        show playerPokemon
+    if php != 0:
+        $ pname = Red.party[currPoke].name
+        $ plevel = Red.party[currPoke].lvl
+        $ pmaxhp = Red.party[currPoke].maxHP
         
-        image enemyPokemon:
-            xalign .02
-            yalign .02
-            xpos 1000
-            ypos 180
-            eImagePath
-        show enemyPokemon
-        
-        if php != 0:
-            $ pname = Red.party[currPoke].name
-            $ plevel = Red.party[currPoke].lvl
-            $ pmaxhp = Red.party[currPoke].maxHP
-            
-        if ehp != 0:
-            $ ename = Blue.party[eCurrPoke].name
-            $ elevel = Blue.party[eCurrPoke].lvl
-            $ emaxhp = Blue.party[eCurrPoke].maxHP
+    if ehp != 0:
+        $ ename = Blue.party[eCurrPoke].name
+        $ elevel = Blue.party[eCurrPoke].lvl
+        $ emaxhp = Blue.party[eCurrPoke].maxHP
             
             
 label battle:
@@ -131,6 +125,7 @@ label battle:
     $ skillChoice = len(Red.party[currPoke].moves)
     $ numSkill = 0
     $ speedTest = Red.party[currPoke].checkSpeed(Blue.party[eCurrPoke])
+    $ switched = False
     $ print(speedTest)
     
     python:
@@ -165,31 +160,56 @@ label battle:
                 jump enemyAttack
         "Switch":
             menu:
-                "[Red.party[0].name]" if numPoke >= 1:
+                "[Red.party[0].name]" if numPoke >= 1 and Red.party[0] != Red.party[currPoke]:
+                    call fight
+                    hide playerPokemon
+                    "[Red.name]: [pname], come back!"
                     $ currPoke = 0
-                "[Red.party[1].name]" if numPoke >= 2:
+                    call switch
+                    "[Red.name]: Go, [pname]!"
+                    jump enemyAttack
+                "[Red.party[1].name]" if numPoke >= 2 and Red.party[1] != Red.party[currPoke]:
+                    call fight
+                    hide playerPokemon
+                    "[Red.name]: [pname], come back!"
                     $ currPoke = 1
-                "[Red.party[2].name]" if numPoke >= 3:
+                    call switch
+                    "[Red.name]: Go, [pname]!"
+                    jump enemyAttack
+                "[Red.party[2].name]" if numPoke >= 3 and Red.party[2] != Red.party[currPoke]:
+                    call fight
+                    hide playerPokemon
+                    "[Red.name]: [pname], come back!"
                     $ currPoke = 2
-                "[Red.party[3].name]" if numPoke >= 4:
+                    call switch
+                    "[Red.name]: Go, [pname]!"
+                    jump enemyAttack
+                "[Red.party[3].name]" if numPoke >= 4 and Red.party[3] != Red.party[currPoke]:
+                    call fight
+                    hide playerPokemon
+                    "[Red.name]: [pname], come back!"
                     $ currPoke = 3
-                "[Red.party[4].name]" if numPoke >= 5:
+                    call switch
+                    "[Red.name]: Go, [pname]!"
+                    jump enemyAttack
+                "[Red.party[4].name]" if numPoke >= 5 and Red.party[4] != Red.party[currPoke]:
+                    call fight
+                    hide playerPokemon
+                    "[Red.name]: [pname], come back!"
                     $ currPoke = 4
-                "[Red.party[5].name]" if numPoke == 6:
+                    call switch
+                    "[Red.name]: Go, [pname]!"
+                    jump enemyAttack
+                "[Red.party[5].name]" if numPoke == 6 and Red.party[5] != Red.party[currPoke]:
+                    call fight
+                    hide playerPokemon
+                    "[Red.name]: [pname], come back!"
                     $ currPoke = 5
+                    call switch
+                    "[Red.name]: Go, [pname]!"
+                    jump enemyAttack
                 "Back":
                     jump battle
-            $ pokeImagePath = "/images/" + Red.party[currPoke].name + ".png"
-            image playerPokemon:
-                xalign .02
-                yalign .02
-                xpos 15
-                ypos 180
-                pokeImagePath
-            show playerPokemon
-            $pname = Red.party[currPoke].name
-            $plevel = Red.party[currPoke].lvl
-            $php = Red.party[currPoke].currHP
             call fight
             jump enemyAttack
            
@@ -216,6 +236,12 @@ label playerAttack:
     $ skill_name = Red.party[currPoke].moves[numSkill].name
     "[pname] used [skill_name]!"
     $ Red.party[currPoke].attack(Red.party[currPoke].moves[numSkill], Blue.party[eCurrPoke])
+    if Blue.party[eCurrPoke].currHP > 0:
+        $ ehp = Blue.party[eCurrPoke].currHP
+        call fight
+    else:
+        $ ehp = 0
+        call fight
         
     if Red.party[currPoke].moves[numSkill].effect == 1:
         call fight
@@ -240,17 +266,19 @@ label playerAttack:
         hide enemyPokemon
         $ Blue.knockOut(eCurrPoke)
         $ enemyPoke = Blue.numPoke()
-        #call e_defeat
         
         if enemyPoke > 0:
+            $ ename = Blue.party[eCurrPoke].name
+            "Blue: Go, [ename]!"
             call pokemon
             jump battle
         else:
             call e_defeat
         
-    if speedTest == True:
+    if speedTest == True and switched == False:
+        $print (switched)
         jump enemyAttack
-    elif speedTest == False:
+    else:
         call pokemon
         jump battle
         
@@ -275,7 +303,13 @@ label enemyAttack:
     
     "[poke_name] used [skill_name]!"
     $ Blue.party[eCurrPoke].attack(skill, target)
-    
+    if Red.party[currPoke].currHP > 0:
+       $  php = Red.party[currPoke].currHP
+       call fight
+    else:
+        $ php = 0
+        call fight
+
     if Blue.party[eCurrPoke].moves[pickedMove].effect == 1:
         call fight
         if Red.party[currPoke].currPDef >= Red.party[currPoke].pDef - 6:
@@ -305,41 +339,28 @@ label enemyAttack:
             call p_defeat
         
     if speedTest == True:
+        $ print (speedTest)
         call pokemon
         jump battle
-    elif speedTest == False:
+    elif speedTest == False and switched == False:
         jump playerAttack
+    elif speedTest == False and switched == True:
+        call pokemon
+        jump battle
         
-
-
-# Old function, replaced with player attack and enemy attack        
-label use_skill:
+label switch:
+    $ pname = Red.party[currPoke].name
+    $ plevel = Red.party[currPoke].lvl
+    $ pmaxhp = Red.party[currPoke].maxHP
+    $ php = Red.party[currPoke].currHP
+    $ switched = True
     call fight
-    $ skill_name = Red.party[currPoke].moves[numSkill].name
-    "[pname] used [skill_name]!"
-    $ Red.party[currPoke].attack(Red.party[currPoke].moves[numSkill], Blue.party[currPoke])
-        
-    if Red.party[currPoke].moves[numSkill].effect == 1:
-        call fight
-        if Blue.party[currPoke].currPDef > Blue.party[currPoke].pDef - 6:
-            "You lowered your opponents defense!"
-        elif Blue.party[currPoke].currPDef == Blue.party[currPoke].pDef - 6:
-            "You can't lower your opponents defense anymore!"
-
-    if Red.party[currPoke].isCrit == True:
-        call fight
-        "Critical strike!"
-    if Red.party[currPoke].dmgMod > 1:
-        call fight
-        "It's super effective!"
-
-        
-    #$ checkEHP = Blue.party[currPoke].currHP    
-    #if checkEHP <= 0:
-    #    $ ehp = 0
-    #    call fight
-    #    "Enemy [ename] fainted!"
-    #    call enemyHideImage
-    #    call e_defeat
-        
-    call pokemon
+    $ pokeImagePath = "/images/" + Red.party[currPoke].name + ".png"
+    image playerPokemon:
+        xalign .02
+        yalign .02
+        xpos 15
+        ypos 180
+        pokeImagePath
+    show playerPokemon
+    call fight
