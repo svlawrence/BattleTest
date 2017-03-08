@@ -3,6 +3,7 @@ init 1 python:
     #Declarations. Ideally you would set these early in the game. Not completely done.
     Tackle = Moves("Tackle", 35, 0, 0, 35, 100, 0)
     Tail_Whip = Moves("Tail Whip", 35, 0, 0, 0, 100, 1)
+    Bubble = Moves("Bubble", 35, 2, 1, 40, 100, 0)
     Charmander = Pokemon("Charmander", 1, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0)
     Bulbasaur = Pokemon("Bulbasaur", 4, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0)
     Squirtle = Pokemon("Squirtle", 2, 18, 5, 20, 20, 11, 11, 13, 12, 10, 0)
@@ -22,6 +23,7 @@ init 1 python:
     Red.party[1].addMove(Tail_Whip)
     Blue.party[0].addMove(Tackle)
     Blue.party[0].addMove(Tail_Whip)
+    Blue.party[0].addMove(Bubble)
     Blue.party[1].addMove(Tackle)
     Blue.party[1].addMove(Tail_Whip)
     
@@ -30,11 +32,14 @@ init 1 python:
     
     # Setting index for Blue's pokemon
     eCurrPoke = 0
- 
+    
+    def face_frame(img, **properties):
+        ui.frame(xfill=False, yminimum=0, **properties)
+        ui.image(img)
+        
     def stats_frame(name, level, hp, maxhp, **properties):
 
-        ui.frame(xfill=False, xpadding=100, yminimum=None, **properties)
-
+        ui.frame(xfill=False, yminimum=0, **properties)
         ui.hbox() # (name, "HP", bar) from (level, hp, maxhp)
         ui.vbox() # name from ("HP", bar)
 
@@ -42,21 +47,48 @@ init 1 python:
 
         ui.hbox() # "HP" from bar
         ui.text("HP", size=20)
-        ui.bar(maxhp, hp,
-               xmaximum=150)
+        ui.bar(maxhp, hp, xmaximum=150)
 
         ui.close()
         ui.close()
 
         ui.vbox() # Level from (hp/maxhp)
-
+        
         ui.text("Lv. %d" % level, xalign=0.5, size=20)
         ui.text("%d/%d" % (hp, maxhp), xalign=0.5, size=20)
 
         ui.close()
         ui.close()
     combat_turn = 0
- 
+
+label splash:
+    image Red_Splash:
+        xpos .20
+        ypos 750
+        zoom .75
+        "/images/red_casual_1024.png"
+    
+    image Enemy_Splash:
+        xpos .80
+        ypos 750
+        zoom .75
+        "/images/blue_casual_1024.png"
+        
+    image versus:
+        ypos 600
+        "images/versus.png"
+        
+    show Red_Splash with moveinleft
+    show versus zorder 1 with moveintop
+    show Enemy_Splash with moveinright
+    
+    pause 1.0
+    
+    hide Red_Splash
+    hide Enemy_Splash
+    hide versus    
+    call combat
+
 label combat:
     if combat_turn == 0:
         menu:
@@ -79,10 +111,13 @@ label combat:
 label fight:
 
     # Player Stats Frame
-    $ stats_frame(pname, plevel, php, pmaxhp, xalign=.02, yalign=.7)
+    $ stats_frame(pname, plevel, php, pmaxhp, xalign=.17, yalign=.7)
+    $ face_frame("/images/red_battle_portrait.png", xalign = 0.02, yalign=.653)
+    
         
     # Enemy Stats Frame
-    $ stats_frame(ename, elevel, ehp, emaxhp, xalign=.98, yalign=.7)
+    $ stats_frame(ename, elevel, ehp, emaxhp, xalign=.83, yalign=.7)
+    $ face_frame("/images/blue_battle_portrait.png", xalign = 0.98, yalign=.653)
     return
         
 # Pokemon update label

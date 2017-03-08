@@ -1,32 +1,30 @@
 ﻿I'm sorry, but an uncaught exception occurred.
 
 While running game code:
-  File "game/script.rpy", line 9, in script call
-    call combat
-  File "game/combatsystem.rpy", line 176, in script call
-    call switch
-  File "game/combatsystem.rpy", line 357, in script
-    $ print("Player switched. Speed test is %r, Switched is $r" % (speedTest, switched))
-  File "game/combatsystem.rpy", line 357, in <module>
-    $ print("Player switched. Speed test is %r, Switched is $r" % (speedTest, switched))
-TypeError: not all arguments converted during string formatting
+  File "game/script.rpy", line 10, in script call
+    call splash
+  File "game/combatsystem.rpy", line 82, in script
+    show versus with moveindown
+  File "game/combatsystem.rpy", line 82, in <module>
+    show versus with moveindown
+NameError: name 'moveindown' is not defined
 
 -- Full Traceback ------------------------------------------------------------
 
 Full traceback:
-  File "game/script.rpy", line 9, in script call
-    call combat
-  File "game/combatsystem.rpy", line 176, in script call
-    call switch
-  File "game/combatsystem.rpy", line 357, in script
-    $ print("Player switched. Speed test is %r, Switched is $r" % (speedTest, switched))
-  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\ast.py", line 814, in execute
-    renpy.python.py_exec_bytecode(self.code.bytecode, self.hide, store=self.store)
-  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\python.py", line 1715, in py_exec_bytecode
-    exec bytecode in globals, locals
-  File "game/combatsystem.rpy", line 357, in <module>
-    $ print("Player switched. Speed test is %r, Switched is $r" % (speedTest, switched))
-TypeError: not all arguments converted during string formatting
+  File "game/script.rpy", line 10, in script call
+    call splash
+  File "game/combatsystem.rpy", line 82, in script
+    show versus with moveindown
+  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\ast.py", line 1271, in execute
+    paired = renpy.python.py_eval(self.paired)
+  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\python.py", line 1745, in py_eval
+    return py_eval_bytecode(code, globals, locals)
+  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\python.py", line 1739, in py_eval_bytecode
+    return eval(bytecode, globals, locals)
+  File "game/combatsystem.rpy", line 82, in <module>
+    show versus with moveindown
+NameError: name 'moveindown' is not defined
 
 Windows-8-6.2.9200
 Ren'Py 6.99.12.3.2123

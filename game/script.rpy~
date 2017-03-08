@@ -6,5 +6,4 @@
 # The game starts here.
 
 label start:
-    scene black
-    call splash
+    call combat

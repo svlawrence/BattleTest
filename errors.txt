@@ -2,7 +2,8 @@
 errors listed below, and try again.
 
 
-File "game/combatsystem.rpy", line 215: is not terminated with a newline. (Check strings and parenthesis.)
-                $ print("Player switched. Speed test is %r, Switched is $r" % (speedTest, switched)
+File "game/combatsystem.rpy", line 75: expected 'comma or end of line' not found.
+    zorder 1
+    ^
 
 Ren'Py Version: Ren'Py 6.99.12.3.2123
