@@ -6,4 +6,4 @@
 # The game starts here.
 
 label start:
-    call combat
+    call splash

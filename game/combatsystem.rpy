@@ -62,8 +62,10 @@ init 1 python:
     combat_turn = 0
 
 label splash:
+            
+    
     image Red_Splash:
-        xpos .20
+        #xpos .20
         ypos 750
         zoom .75
         "/images/red_casual_1024.png"
@@ -78,15 +80,21 @@ label splash:
         ypos 600
         "images/versus.png"
         
-    show Red_Splash with moveinleft
-    show versus zorder 1 with moveintop
-    show Enemy_Splash with moveinright
-    
-    pause 1.0
+    show Red_Splash:
+        xalign -1 yalign 1.0
+        ease 0.5 xalign -.1
+    show Enemy_Splash:
+        xalign 2.0 yalign 1.0
+        ease 0.5 xalign 1.0
+    pause 0.5
+    show versus:
+        xalign 0.5 yalign -0.5
+        ease 0.5 yalign 0.5
+    pause 1
     
     hide Red_Splash
     hide Enemy_Splash
-    hide versus    
+    hide versus
     call combat
 
 label combat:

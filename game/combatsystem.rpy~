@@ -21,8 +21,8 @@ init 1 python:
     Red.party[0].addMove(Tail_Whip)
     Red.party[1].addMove(Tackle)
     Red.party[1].addMove(Tail_Whip)
-    #Blue.party[0].addMove(Tackle)
-    #Blue.party[0].addMove(Tail_Whip)
+    Blue.party[0].addMove(Tackle)
+    Blue.party[0].addMove(Tail_Whip)
     Blue.party[0].addMove(Bubble)
     Blue.party[1].addMove(Tackle)
     Blue.party[1].addMove(Tail_Whip)
@@ -60,7 +60,41 @@ init 1 python:
         ui.close()
         ui.close()
     combat_turn = 0
- 
+
+label splash:
+    image Red_Splash:
+        xpos .20
+        ypos 750
+        zoom .75
+        "/images/red_casual_1024.png"
+    
+    image Enemy_Splash:
+        xpos .80
+        ypos 750
+        zoom .75
+        "/images/blue_casual_1024.png"
+        
+    image versus:
+        ypos 600
+        "images/versus.png"
+        
+    show Red_Splash:
+        xalign -1 yalign 1.0
+        ease 0.5 xalign 0.25
+    show versus zorder 1:
+        xalign 0.5 yalign 0.0
+        ease 0.5 yalign 0.5
+    show Enemy_Splash:
+        xalign 2.5 yalign 1.0
+        ease 0.5 xalign 0.75
+    
+    pause 1.0
+    
+    hide Red_Splash
+    hide Enemy_Splash
+    hide versus    
+    call combat
+
 label combat:
     if combat_turn == 0:
         menu:

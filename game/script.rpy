@@ -6,5 +6,5 @@
 # The game starts here.
 
 label start:
-    scene black
+    scene
     call splash

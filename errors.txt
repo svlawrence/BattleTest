@@ -2,8 +2,8 @@
 errors listed below, and try again.
 
 
-File "game/combatsystem.rpy", line 75: expected 'comma or end of line' not found.
-    zorder 1
-    ^
+File "game/combatsystem.rpy", line 67: on expects a non-empty block.
+    on hide:
+            ^
 
-Ren'Py Version: Ren'Py 6.99.12.3.2123
+Ren'Py Version: Ren'Py 6.99.12.4.2187
