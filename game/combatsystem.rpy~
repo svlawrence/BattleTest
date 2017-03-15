@@ -35,7 +35,7 @@ init 1 python:
     
     def face_frame(img, **properties):
         ui.frame(xfill=False, yminimum=0, **properties)
-        ui.image(img)
+        ui.image(img,**properties)
         
     def stats_frame(name, level, hp, maxhp, **properties):
 
@@ -62,8 +62,10 @@ init 1 python:
     combat_turn = 0
 
 label splash:
+            
+    
     image Red_Splash:
-        xpos .20
+        #xpos .20
         ypos 750
         zoom .75
         "/images/red_casual_1024.png"
@@ -80,19 +82,19 @@ label splash:
         
     show Red_Splash:
         xalign -1 yalign 1.0
-        ease 0.5 xalign 0.25
-    show versus zorder 1:
-        xalign 0.5 yalign 0.0
-        ease 0.5 yalign 0.5
+        ease 0.5 xalign -.1
     show Enemy_Splash:
-        xalign 2.5 yalign 1.0
-        ease 0.5 xalign 0.75
-    
-    pause 1.0
+        xalign 2.0 yalign 1.0
+        ease 0.5 xalign 1.0
+    pause 0.5
+    show versus:
+        xalign 0.5 yalign -0.5
+        ease 0.5 yalign 0.5
+    pause 1
     
     hide Red_Splash
     hide Enemy_Splash
-    hide versus    
+    hide versus
     call combat
 
 label combat:
@@ -118,7 +120,14 @@ label fight:
 
     # Player Stats Frame
     $ stats_frame(pname, plevel, php, pmaxhp, xalign=.17, yalign=.7)
-    $ face_frame("/images/red_battle_portrait.png", xalign = 0.02, yalign=.653)
+    if Red.party[currPoke].currHP >= round(Red.party[currPoke].currHP * .75):
+        print(Red.party[currPoke].currHP * .75)
+        $ face_frame("/images/Portraits/Red Square Casual Happy.png", xalign = 0.02, yalign=.653, zoom=.25)
+    if Red.party[currPoke].currHP <= round(Red.party[currPoke].currHP * .75) and Red.party[currPoke].currHP > round(Red.party[currPoke].currHP * .25):
+        $ face_frame("/images/Portraits/Red Square Casual Neutral.png", xalign = 0.02, yalign=.653, zoom=.25)
+    elif Red.party[currPoke].currHP <= round(Red.party[currPoke].currHP * .25):
+        $ face_frame("/images/Portraits/Red Square Casual Worried.png", xalign = 0.02, yalign=.653, zoom=.25)
+    #$ face_frame("/images/red_battle_portrait.png", xalign = 0.02, yalign=.653)
     
         
     # Enemy Stats Frame

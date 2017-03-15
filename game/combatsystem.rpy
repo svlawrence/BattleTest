@@ -35,7 +35,7 @@ init 1 python:
     
     def face_frame(img, **properties):
         ui.frame(xfill=False, yminimum=0, **properties)
-        ui.image(img)
+        ui.image(img,**properties)
         
     def stats_frame(name, level, hp, maxhp, **properties):
 
@@ -62,7 +62,9 @@ init 1 python:
     combat_turn = 0
 
 label splash:
-            
+
+    $ renpy.music.queue("music/battle/KantoTrainerStart_Rock.ogg", channel='music', loop=None, fadein=1.0)
+    $ renpy.music.queue("music/battle/KantoTrainerLoop_Rock.ogg", channel='music', loop=True)
     
     image Red_Splash:
         #xpos .20
@@ -120,12 +122,17 @@ label fight:
 
     # Player Stats Frame
     $ stats_frame(pname, plevel, php, pmaxhp, xalign=.17, yalign=.7)
-    $ face_frame("/images/red_battle_portrait.png", xalign = 0.02, yalign=.653)
+    if Red.party[currPoke].currHP >= round(Red.party[currPoke].maxHP * .75):
+        $ face_frame("/images/Portraits/Red Square Casual Happy.png", xalign = 0.02, yalign=.653, zoom=.25)
+    if Red.party[currPoke].currHP <= round(Red.party[currPoke].maxHP * .75) and Red.party[currPoke].currHP > Red.party[currPoke].maxHP * .25:
+        $ face_frame("/images/Portraits/Red Square Casual Neutral.png", xalign = 0.02, yalign=.653, zoom=.25)
+    elif Red.party[currPoke].currHP <= round(Red.party[currPoke].maxHP * .25):
+        $ face_frame("/images/Portraits/Red Square Casual Worried.png", xalign = 0.02, yalign=.653, zoom=.25)
     
         
     # Enemy Stats Frame
     $ stats_frame(ename, elevel, ehp, emaxhp, xalign=.83, yalign=.7)
-    $ face_frame("/images/blue_battle_portrait.png", xalign = 0.98, yalign=.653)
+    $ face_frame("/images/Portraits/Blue Square Casual Neutral.png", xalign = 0.98, yalign=.653)
     return
         
 # Pokemon update label
@@ -277,6 +284,7 @@ label p_defeat:
 label playerAttack:
     call fight
     $ skill_name = Red.party[currPoke].moves[numSkill].name
+    $ face_frame("/images/Portraits/Red Square Casual Attacking.png", xalign = 0.02, yalign=.653, zoom=.25)
     "[pname] used [skill_name]!"
     $ Red.party[currPoke].attack(Red.party[currPoke].moves[numSkill], Blue.party[eCurrPoke])
     if Blue.party[eCurrPoke].currHP > 0:

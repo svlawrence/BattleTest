@@ -2,8 +2,8 @@
 errors listed below, and try again.
 
 
-File "game/combatsystem.rpy", line 67: on expects a non-empty block.
-    on hide:
-            ^
+File "game/combatsystem.rpy", line 126: expected statement.
+    print(Red.party[currPoke].currHP * .75)
+                                           ^
 
 Ren'Py Version: Ren'Py 6.99.12.4.2187
