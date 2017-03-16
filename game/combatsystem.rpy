@@ -4,31 +4,24 @@ init 1 python:
     Tackle = Moves("Tackle", 35, 0, 0, 35, 100, 0)
     Tail_Whip = Moves("Tail Whip", 35, 0, 0, 0, 100, 1)
     Bubble = Moves("Bubble", 35, 2, 1, 40, 100, 0)
-    Charmander = Pokemon("Charmander", 1, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0)
-    Bulbasaur = Pokemon("Bulbasaur", 4, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0)
-    Squirtle = Pokemon("Squirtle", 2, 18, 5, 20, 20, 11, 11, 13, 12, 10, 0)
+    Charmander = Pokemon("Charmander", 1, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0, 3)
+    Bulbasaur = Pokemon("Bulbasaur", 4, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0, 3)
+    Squirtle = Pokemon("Squirtle", 2, 18, 5, 20, 20, 11, 11, 13, 12, 10, 0, 100)
     Red = Trainer("Red", 1)
-    Blue = Trainer("Blue", 2)
+    Blue = Trainer("Blue", 0)
     
     # Catching members. Ignore for now
     Red.catchMember(Charmander)
-    Red.catchMember(Squirtle)
     Blue.catchMember(Squirtle)
-    Blue.catchMember(Charmander)
 
     # Giving pokemon moves
     Red.party[0].addMove(Tackle)
     Red.party[0].addMove(Tail_Whip)
-    Red.party[1].addMove(Tackle)
-    Red.party[1].addMove(Tail_Whip)
     Blue.party[0].addMove(Tackle)
     Blue.party[0].addMove(Tail_Whip)
     Blue.party[0].addMove(Bubble)
-    Blue.party[1].addMove(Tackle)
-    Blue.party[1].addMove(Tail_Whip)
     
     # Number of pokemon in Red's party.
-    numPoke = Red.numPoke()
     
     # Setting index for Blue's pokemon
     eCurrPoke = 0
@@ -36,36 +29,18 @@ init 1 python:
     def face_frame(img, **properties):
         ui.frame(xfill=False, yminimum=0, **properties)
         ui.image(img,**properties)
-        
-    def stats_frame(name, level, hp, maxhp, **properties):
 
-        ui.frame(xfill=False, yminimum=0, **properties)
-        ui.hbox() # (name, "HP", bar) from (level, hp, maxhp)
-        ui.vbox() # name from ("HP", bar)
-
-        ui.text(name, size=20)
-
-        ui.hbox() # "HP" from bar
-        ui.text("HP", size=20)
-        ui.bar(maxhp, hp, xmaximum=150)
-
-        ui.close()
-        ui.close()
-
-        ui.vbox() # Level from (hp/maxhp)
-        
-        ui.text("Lv. %d" % level, xalign=0.5, size=20)
-        ui.text("%d/%d" % (hp, maxhp), xalign=0.5, size=20)
-
-        ui.close()
-        ui.close()
     combat_turn = 0
+    
+    Red.pokeBalls = 3
+    Red.greatBalls = 2
+    Red.ultraBalls = 1
 
 label splash:
 
     $ renpy.music.queue("music/battle/KantoTrainerStart_Rock.ogg", channel='music', loop=None, fadein=1.0)
     $ renpy.music.queue("music/battle/KantoTrainerLoop_Rock.ogg", channel='music', loop=True)
-    
+    $ numPoke = Red.numPoke()
     image Red_Splash:
         #xpos .20
         ypos 750
@@ -262,7 +237,30 @@ label battle:
                     jump battle
             call fight
             jump enemyAttack
-           
+        "Catch" if Blue.ID == 0:
+            menu:
+                "Use Poke Ball ([Red.pokeBalls] left)" if Red.pokeBalls > 0:
+                    $ bonus = 1
+                    $ Red.pokeBalls = Red.pokeBalls - 1
+                "Use Great Ball ([Red.greatBalls] left)" if Red.greatBalls > 0:
+                    $ bonus = 2
+                    $ Red.greatBalls = Red.greatBalls - 1
+                "Use Ultra Ball ([Red.ultraBalls] left)" if Red.ultraBalls > 0: 
+                    $ bonus = 3
+                    $ Red.ultraBalls = Red.ultraBalls - 1
+                "Back":
+                    jump battle
+            $ attemptCatch = Red.tryCatch(Blue.party[eCurrPoke].status, Blue.party[eCurrPoke].currHP, Blue.party[eCurrPoke].maxHP, Blue.party[eCurrPoke].catchRate, bonus)
+            if attemptCatch == True:
+                 $ switched = True
+                 $ Red.catchMember(Squirtle)
+                 $ print(len(Red.party))
+                 "You caught the Pokemon!"
+                 jump e_defeat
+            else:
+                 $ switched = True
+                 "Darn! Didn't catch it!"
+                 jump enemyAttack
 
 
 label hideImage:
@@ -274,11 +272,15 @@ label enemyHideImage:
 label e_defeat:
      scene black with dissolve
      centered "You win!"
-     $ renpy.full_restart()
+     $  Red.partyHeal()
+     $  Blue.partyHeal()
+     $  renpy.full_restart()
 
 label p_defeat:
      scene black with dissolve
      centered "You lose!"
+     $  Red.partyHeal()
+     $  Blue.partyHeal()
      $ renpy.full_restart()     
      
 label playerAttack:

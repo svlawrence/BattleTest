@@ -1,70 +1,27 @@
 ﻿I'm sorry, but an uncaught exception occurred.
 
 While running game code:
-  File "game/script.rpy", line 10, in script call
-    call splash
-  File "game/combatsystem.rpy", line 100, in script call
-    call combat
-  File "game/combatsystem.rpy", line 104, in script
-    menu:
-  File "game/screens.rpy", line 202, in execute
-    screen choice(items):
-  File "game/screens.rpy", line 202, in execute
-    screen choice(items):
-  File "game/screens.rpy", line 205, in execute
-    vbox:
-  File "game/screens.rpy", line 206, in execute
-    for i in items:
-  File "game/screens.rpy", line 207, in execute
-    textbutton i.caption action i.action
+  File "game/combatsystem.rpy", line 1, in script
+    init 1 python:
+  File "game/combatsystem.rpy", line 20, in <module>
+    Red.party[1].addMove(Tackle)
 IndexError: list index out of range
 
 -- Full Traceback ------------------------------------------------------------
 
 Full traceback:
-  File "game/script.rpy", line 10, in script call
-    call splash
-  File "game/combatsystem.rpy", line 100, in script call
-    call combat
-  File "game/combatsystem.rpy", line 104, in script
-    menu:
-  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\ast.py", line 1459, in execute
-    choice = renpy.exports.menu(choices, self.set)
-  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\exports.py", line 847, in menu
-    rv = renpy.store.menu(items)
-  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\exports.py", line 1005, in display_menu
-    show_screen(screen, items=item_actions, _widget_properties=props, _transient=True, _layer=renpy.config.choice_layer, **scope)
-  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\display\screen.py", line 1041, in show_screen
-    sls.add(_layer, d, _tag, zorder=d.zorder, transient=_transient, keep_st=True, name=name)
-  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\display\core.py", line 1009, in add
-    self.hide_or_replace(layer, remove_index, "replaced")
-  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\display\core.py", line 1031, in hide_or_replace
-    d = oldsle.displayable._hide(now - st, now - at, prefix)
-  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\display\screen.py", line 443, in _hide
-    self.update()
-  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\display\screen.py", line 578, in update
-    self.screen.function(**self.scope)
-  File "game/screens.rpy", line 202, in execute
-    screen choice(items):
-  File "game/screens.rpy", line 202, in execute
-    screen choice(items):
-  File "game/screens.rpy", line 205, in execute
-    vbox:
-  File "game/screens.rpy", line 206, in execute
-    for i in items:
-  File "game/screens.rpy", line 207, in execute
-    textbutton i.caption action i.action
-  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\ui.py", line 951, in _textbutton
-    text = renpy.text.text.Text(label, style=text_style, substitute=substitute, scope=scope, **text_kwargs)
-  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\text\text.py", line 1328, in __init__
-    self.set_text(text, scope, substitute)
-  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\text\text.py", line 1426, in set_text
-    i, did_sub = renpy.substitutions.substitute(i, scope, substitute)
-  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\substitutions.py", line 232, in substitute
-    s = formatter.vformat(s, (), kwargs)
-  File "/home/tom/ab/x64lucid-deps/install/lib/python2.7/string.py", line 563, in vformat
-  File "/home/tom/ab/x64lucid-deps/install/lib/python2.7/string.py", line 585, in _vformat
-  File "/home/tom/ab/x64lucid-deps/install/lib/python2.7/string.py", line 654, in get_field
+  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\bootstrap.py", line 295, in bootstrap
+    renpy.main.main()
+  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\main.py", line 419, in main
+    game.context().run(node)
+  File "game/combatsystem.rpy", line 1, in script
+    init 1 python:
+  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\ast.py", line 814, in execute
+    renpy.python.py_exec_bytecode(self.code.bytecode, self.hide, store=self.store)
+  File "C:\Users\svlaw\Downloads\renpy-6.99.12.3-sdk\renpy\python.py", line 1719, in py_exec_bytecode
+    exec bytecode in globals, locals
+  File "game/combatsystem.rpy", line 20, in <module>
+    Red.party[1].addMove(Tackle)
 IndexError: list index out of range
 
 Windows-8-6.2.9200

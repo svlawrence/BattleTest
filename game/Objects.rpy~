@@ -1,4 +1,4 @@
-init -1 python:
+init -2 python:
 
     from __future__ import division
     from random import randint

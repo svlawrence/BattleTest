@@ -2,8 +2,8 @@
 errors listed below, and try again.
 
 
-File "game/combatsystem.rpy", line 126: expected statement.
-    print(Red.party[currPoke].currHP * .75)
-                                           ^
+File "game/combatsystem.rpy", line 258: expected statement.
+    print len(Red.party)
+             ^
 
 Ren'Py Version: Ren'Py 6.99.12.4.2187
