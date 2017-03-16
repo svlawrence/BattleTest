@@ -253,7 +253,7 @@ label battle:
             $ attemptCatch = Red.tryCatch(Blue.party[eCurrPoke].status, Blue.party[eCurrPoke].currHP, Blue.party[eCurrPoke].maxHP, Blue.party[eCurrPoke].catchRate, bonus)
             if attemptCatch == True:
                  $ switched = True
-                 $ Red.catchMember(Squirtle)
+                 $ Red.catchMember(Blue.party[eCurrPoke])
                  $ print(len(Red.party))
                  "You caught the Pokemon!"
                  jump e_defeat
