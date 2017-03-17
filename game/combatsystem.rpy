@@ -4,11 +4,11 @@ init 1 python:
     Tackle = Moves("Tackle", 35, 0, 0, 35, 100, 0)
     Tail_Whip = Moves("Tail Whip", 35, 0, 0, 0, 100, 1)
     Bubble = Moves("Bubble", 35, 2, 1, 40, 100, 0)
-    Charmander = Pokemon("Charmander", 1, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0, 3)
+    Charmander = Pokemon("Charmander", 1, 18, 5, 100, 100, 11, 13, 11, 13, 11, 0, 3)
     Bulbasaur = Pokemon("Bulbasaur", 4, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0, 3)
     Squirtle = Pokemon("Squirtle", 2, 18, 5, 20, 20, 11, 11, 13, 12, 10, 0, 100)
     Red = Trainer("Red", 1)
-    Blue = Trainer("Blue", 0)
+    Blue = Trainer("Blue", 2)
     
     # Catching members. Ignore for now
     Red.catchMember(Charmander)
@@ -19,7 +19,7 @@ init 1 python:
     Red.party[0].addMove(Tail_Whip)
     Blue.party[0].addMove(Tackle)
     Blue.party[0].addMove(Tail_Whip)
-    Blue.party[0].addMove(Bubble)
+    #Blue.party[0].addMove(Bubble)
     
     # Number of pokemon in Red's party.
     
@@ -285,9 +285,42 @@ label p_defeat:
      
 label playerAttack:
     call fight
+    if Red.party[currPoke].status == 1:
+        $ wokenup = Red.party[currPoke].sleep()
+        if wokenup == False:
+            call fight
+            "[pname] is asleep!"
+            if speedTest == True and switched == False:
+                jump enemyAttack
+            else:
+                jump endTurn
+        elif wokenup == True:
+            call fight
+            "[pname] woke up!"
     $ skill_name = Red.party[currPoke].moves[numSkill].name
     $ face_frame("/images/Portraits/Red Square Casual Attacking.png", xalign = 0.02, yalign=.653, zoom=.25)
     "[pname] used [skill_name]!"
+    if Red.party[currPoke].status == 5:
+        $ froz = Red.party[currPoke].freeze()
+        if froz == False:
+            call fight
+            "[pname] is frozen!"
+            if speedTest == True and switched == False:
+                jump enemyAttack
+            else:
+                jump endTurn
+        else:
+            call fight
+            "[pname] is frozen no longer!"
+    if Red.party[currPoke].status == 6:
+        $ para = Red.party[currPoke].paralysis()
+        if para == False:
+            call fight
+            "[pname] is paralysed! It can't move!"
+            if speedTest == True and switched == False:
+                jump enemyAttack
+            else:
+                jump endTurn
     $ Red.party[currPoke].attack(Red.party[currPoke].moves[numSkill], Blue.party[eCurrPoke])
     if Blue.party[eCurrPoke].currHP > 0:
         $ ehp = Blue.party[eCurrPoke].currHP
@@ -308,7 +341,16 @@ label playerAttack:
         "Critical strike!"
     if Red.party[currPoke].dmgMod > 1:
         call fight
+        play audio "/se/supereffective.ogg"
         "It's super effective!"
+    if Red.party[currPoke].dmgMod < 1 and Red.party[currPoke].dmgMod != 0:
+        call fight
+        play audio "/se/notveryeffective.ogg"
+        "It's not very effective..."
+    if Red.party[currPoke].dmgMod == 1:
+        play audio "/se/normaldamage.ogg"
+        call fight
+        
 
         
     $ checkEHP = Blue.party[eCurrPoke].currHP    
@@ -329,15 +371,25 @@ label playerAttack:
             call e_defeat
         
     if speedTest == True and switched == False:
-        $print (switched)
         jump enemyAttack
     else:
-        call pokemon
-        jump battle
+        jump endTurn
         
 label enemyAttack:
     call fight
-    
+    if Blue.party[eCurrPoke].status == 1:
+        $ wokenup = Blue.party[eCurrPoke].sleep()
+        $ print(wokenup)
+        if wokenup == False:
+            call fight
+            "[ename] is asleep!"
+            if speedTest == True and switched == False:
+                jump endTurn
+            else:
+                jump playerAttack
+        elif wokenup == True:
+            call fight
+            "[ename] woke up!"    
     $ numMoves = len(Blue.party[eCurrPoke].moves) - 1
     $ pickedMove = randint(0, numMoves)
     python:
@@ -355,6 +407,27 @@ label enemyAttack:
     $ target_name = target.name
     
     "[poke_name] used [skill_name]!"
+    if Blue.party[eCurrPoke].status == 5:
+        $ froz = Blue.party[eCurrPoke].freeze()
+        if froz == False:
+            call fight
+            "[ename] is frozen!"
+            if speedTest == True and switched == False:
+                jump endTurn
+            else:
+                jump playerAttack
+        else:
+            call fight
+            "[ename] is frozen no longer!"
+    if Blue.party[eCurrPoke].status == 6:
+        $ para = Blue.party[eCurrPoke].paralysis()
+        if para == False:
+            call fight
+            "[ename] is paralysed! It can't move!"
+            if speedTest == True and switched == False:
+                jump endTurn
+            else:
+                jump playerAttack
     $ Blue.party[eCurrPoke].attack(skill, target)
     if Red.party[currPoke].currHP > 0:
        $  php = Red.party[currPoke].currHP
@@ -375,7 +448,15 @@ label enemyAttack:
         "Critical strike!"
     if Blue.party[eCurrPoke].dmgMod > 1:
         call fight
+        play audio "/se/supereffective.ogg"
         "It's super effective!"
+    if Blue.party[eCurrPoke].dmgMod < 1 and Blue.party[eCurrPoke].dmgMod != 0:
+        call fight
+        play audio "/se/notveryeffective.ogg"
+        "It's not very effective..."
+    if Blue.party[eCurrPoke].dmgMod == 1:
+        call fight
+        play audio "/se/normaldamage.ogg"
         
     $ checkPHP = Red.party[currPoke].currHP    
     if checkPHP <= 0:
@@ -392,15 +473,77 @@ label enemyAttack:
             call p_defeat
         
     if speedTest == True:
-        $ print (speedTest)
-        call pokemon
-        jump battle
+        jump endTurn
     elif speedTest == False and switched == False:
         jump playerAttack
     elif speedTest == False and switched == True:
-        call pokemon
-        jump battle
+        jump endTurn
+
+label endTurn:
+    if Red.party[currPoke].status == 2:
+        call fight
+        "[pname] is inflicted by poison!"
+        $ Red.party[currPoke].poison()
+    if Red.party[currPoke].status == 3:
+        call fight
+        "[pname] is inflicted by burn!"
+        $ Red.party[currPoke].burn()
+    if Red.party[currPoke].status == 4:
+        call fight
+        "[pname] is badly poisoned!"
+        $ Red.party[currPoke].toxic()
+    if Red.party[currPoke].status == 6:
+        $ Red.party[currPoke].currSpeed *= .5
+
+    $ checkPHP = Red.party[currPoke].currHP    
+    if checkPHP <= 0:
+        $ php = 0
+        call fight
+        "[target_name] fainted!"
+        hide playerPokemon
+        $ Red.knockOut(currPoke)
+        $ numPoke = Red.numPoke()
+        if numPoke > 0:
+            $ combat_turn = 0
+            jump combat
+        else:
+            call p_defeat
+  
+    if Blue.party[eCurrPoke].status == 2:
+        call fight
+        "[ename] is inflicted by poison!"
+        $ Blue.party[eCurrPoke].poison()
+    if Blue.party[eCurrPoke].status == 3:
+        call fight
+        "[ename] is inflicted by burn!"
+        $ Blue.party[eCurrPoke].burn()
+    if Blue.party[eCurrPoke].status == 4:
+        call fight
+        "[ename] is badly poisoned!"
+        $ Blue.party[eCurrPoke].toxic()
+    if Blue.party[eCurrPoke].status == 6:
+        $ Blue.party[eCurrPoke].currSpeed *= .5
+
+    $ checkEHP = Blue.party[eCurrPoke].currHP    
+    if checkEHP <= 0:
+        $ ehp = 0
+        call fight
+        "Enemy [ename] fainted!"
+        hide enemyPokemon
+        $ Blue.knockOut(eCurrPoke)
+        $ enemyPoke = Blue.numPoke()
         
+        if enemyPoke > 0:
+            $ ename = Blue.party[eCurrPoke].name
+            "Blue: Go, [ename]!"
+            call pokemon
+            jump battle
+        else:
+            call e_defeat
+        
+    call pokemon
+    jump battle
+
 label switch:
     $ pname = Red.party[currPoke].name
     $ plevel = Red.party[currPoke].lvl

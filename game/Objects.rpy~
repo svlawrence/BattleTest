@@ -33,7 +33,7 @@ init -2 python:
     class Pokemon(object):
 
         # Since python doesn't use constructors, this is basically the same thing
-        def __init__(self, name, type1, type2, lvl, maxHP, currHP, pAtk, sAtk, pDef, sDef, speed, status):
+        def __init__(self, name, type1, type2, lvl, maxHP, currHP, pAtk, sAtk, pDef, sDef, speed, status, catchRate):
             self.name = name
             self.type1 = pokemon_types[type1]
             self.type2 = pokemon_types[type2]
@@ -54,6 +54,7 @@ init -2 python:
             self.moves = []
             self.dmgMod = 1
             self.isCrit = False
+            self.catchRate = catchRate
 
         def addMove(self, move):
             if len(self.moves) < 4:
@@ -205,6 +206,9 @@ init -2 python:
             self.party = []
             self.knockedOut = []
             self.storage = []
+            self.pokeBalls = 0
+            self.greatBalls = 0
+            self.ultraBalls = 0
 
         def catchMember(self, Pokemon):
             if len(self.party) < 6:
@@ -212,6 +216,16 @@ init -2 python:
             else:
                 print("You have too many members in your party! Pokemon sent to the Deposit Box")
                 self.storage.append(copy.deepcopy(Pokemon))
+                
+        def tryCatch(self, status, hp, maxHP, rate, bonus):
+            if status == 0:
+                status = 1
+            catchChance = round((((3*maxHP - 2*hp)*rate*bonus)/(3*maxHP))*status)
+            diceRoll = randint(0, 255)
+            if (catchChance < diceRoll) and (catchChance < 255):
+                return False
+            elif (catchChance >= diceRoll and catchChance < 255) or (catchChance >= 255):
+                return True
 
         def numPoke(self):
             return len(self.party)
@@ -220,10 +234,10 @@ init -2 python:
             self.knockedOut.append(self.party[i])
             self.party.pop(i)
 
-        def withdraw(self, choice):
+        def withdraw(self, num):
             if len(self.party) < 6:
-                self.party.append(storage[choice])
-                self.storage.pop(choice)
+                self.party.append(self.storage[num])
+                self.storage.pop(num)
                 print("Party Member Added!")
             else:
                 print("Your party already has six Pokemon! Please deposit one before withdrawing another.")
@@ -235,9 +249,42 @@ init -2 python:
                 print("You have deposited a pokemon")
             else:
                 print("You only have one pokemon! You can't deposit any more!")
+                
+        def partyHeal(self):
+            while len(self.knockedOut) != 0:
+                self.party.append(self.knockedOut[0])
+                self.knockedOut.pop(0)
+            for i in range(len(self.party)):
+                self.party[i].currHP = copy.deepcopy(self.party[i].maxHP)
+                self.party[i].currPAtk = copy.deepcopy(self.party[i].pAtk)
+                self.party[i].currPDef = copy.deepcopy(self.party[i].pDef)
+                self.party[i].currSAtk = copy.deepcopy(self.party[i].sAtk)
+                self.party[i].currSDef = copy.deepcopy(self.party[i].sDef)
+                self.party[i].currSpeed = copy.deepcopy(self.party[i].speed)
 
         
+    def stats_frame(name, level, hp, maxhp, **properties):
 
+        ui.frame(xfill=False, yminimum=0, **properties)
+        ui.hbox() # (name, "HP", bar) from (level, hp, maxhp)
+        ui.vbox() # name from ("HP", bar)
+
+        ui.text(name, size=20)
+
+        ui.hbox() # "HP" from bar
+        ui.text("HP", size=20)
+        ui.bar(maxhp, hp, xmaximum=150)
+
+        ui.close()
+        ui.close()
+
+        ui.vbox() # Level from (hp/maxhp)
+        
+        ui.text("Lv. %d" % level, xalign=0.5, size=20)
+        ui.text("%d/%d" % (hp, maxhp), xalign=0.5, size=20)
+
+        ui.close()
+        ui.close()
     ## Old classes previously used for party management. Now this information is stored in the "Trainer" class. A lot
     ## of functions have been ported over to the new class
     ##

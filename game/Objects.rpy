@@ -55,6 +55,7 @@ init -2 python:
             self.dmgMod = 1
             self.isCrit = False
             self.catchRate = catchRate
+            self.badPoison = 1
 
         def addMove(self, move):
             if len(self.moves) < 4:
@@ -150,14 +151,7 @@ init -2 python:
                 else:
                     atk = self.currPAtk
                     defe = target.currPDef
-                # Actual damage calculation
-                #damagep1 = (2*level)/5 + 2
-                #damagep2 = atk/defe
-                #damagep3 = bonus * typeMod * critical * randNum
-                #print("%f %f %f" % (damagep1, move.damage, damagep2))
-                #damage = ((damagep1 * move.damage * damagep2 / 50))
                 damage = round((((2 * (level + 10)) / 250) * (atk/defe) * move.damage + 2) * (bonus * typeMod * critical * randNum))
-                
                 #print("%d" % damage)
                 self.dam = damage
                 # Subtracts opposing pokemon's HP
@@ -170,6 +164,47 @@ init -2 python:
                 self.isCrit = False
                 self.dmgMod = 0
                 move.determineEffect(target)
+                
+        def sleep(self):
+            if self.status == 1:
+                wake = randint(1, 3)
+                if wake == 3:
+                    self.status = 0
+                    return True
+                else:
+                    return False
+            else:
+                return 0
+                
+        def poison(self):
+            self.currHP -= round(self.maxHP * .12)
+        
+        def burn(self):
+            self.currHP -= round(self.maxHP * .12)
+            self.currPAtk = round(self.pAtk * .5)
+            
+        def freeze(self):
+            if self.status == 5:
+                unfreeze = randint(1,5)
+                if unfreeze == 1:
+                    self.status = 0
+                    return True
+                else:
+                    return False
+            else:
+                return 0
+                
+        def paralysis(self):
+            if self.status == 6:
+                hit = randint(1,4)
+                if hit == 4:
+                    return False
+                else:
+                    return True
+            
+        def toxic(self):
+            self.currHP -= round(self.maxHP * (self.badPoison/16))
+            self.badPoison += 1
 
     class Moves(object):
 
@@ -186,18 +221,18 @@ init -2 python:
             if self.effect == 1:
                 if target.currPDef > target.pDef - 6:
                     target.currPDef -= 1
-                    #print("You lowered your opponents defense!")
-                else:
-                    return "You can't lower your opponents defense anymore!"
-                    #print("You can't lower your opponents defense anymore!")
             elif self.effect == 2:
-                target.currPAtk -= 1
+                if target.currPAtk > target.pAtk - 6:
+                    target.currpAtk -= 1
             elif self.effect == 3:
-                target.currSDef -= 1
+                if target.currSDef > target.sDef - 6:
+                    target.currSDef -= 1
             elif self.effect == 4:
-                target.currSAtk -= 1
+                if target.currSAtk > target.sAtk - 6:
+                    target.currSAtk -= 1
             elif self.effect == 5:
-                target.currSpeed -= 1
+                if target.currSpeed > target.speed - 6:
+                    target.currSpeed -= 1
 
     class Trainer(object):
         def __init__(self, name, ID):
@@ -261,6 +296,7 @@ init -2 python:
                 self.party[i].currSAtk = copy.deepcopy(self.party[i].sAtk)
                 self.party[i].currSDef = copy.deepcopy(self.party[i].sDef)
                 self.party[i].currSpeed = copy.deepcopy(self.party[i].speed)
+                self.party[i].badPoison = 0
 
         
     def stats_frame(name, level, hp, maxhp, **properties):
