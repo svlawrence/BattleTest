@@ -1,25 +1,20 @@
 label RedVBlue:
-    
-    python:   
-        #Declarations. Ideally you would set these early in the game. Not completely done.
-        
-        # Moves: name, type, spec, damage, accuracy, effect
-        #Tackle = Moves("Tackle", 0, 0, 35, 100, 0, 0)
-        #Tail_Whip = Moves("Tail Whip", 0, 0, 0, 100, 1, 0)
-        #Bubble = Moves("Bubble", 2, 1, 40, 100, 0, 0)
-        #Thunder_Shock = Moves("Thunder Shock", 3, 1, 40, 100, 0, 0)
-        #Razor_Leaf = Moves("Ember", 1, 1, 55, 100, 23, 0)
-        # name, type1, type2, base_HP, base_pAtk, base_sAtk, base_pDef, base_sDef, base_speed, catchRate
+    # This is the beginning of an encounter. This is where things will be set up
+    python:
+        # Setting appropriate levels
         Squirtle.lvl = 5
         Charmander.lvl = 5
+        # Calculating stats
         Squirtle.calcStats()
         Charmander.calcStats()
         
+        # Setting up trainers
         Red = Trainer("Red", 1)
         Blue = Trainer("Blue", 2)
         
         # Catching members. Ignore for now
         Red.catchMember(Charmander)
+        Red.catchMember(Pikachu)
         Blue.catchMember(Squirtle)
         
         # Giving pokemon moves
@@ -40,46 +35,63 @@ label RedVBlue:
         Red.pokeBalls = 3
         Red.greatBalls = 2
         Red.ultraBalls = 1
-            
+    # After initial setup is complete, jump to the splash screen        
     jump .splash
 
+# Splash screen
 label .splash:
-
+    # Queue music
     $ renpy.music.queue("music/battle/KantoTrainerStart_Rock.ogg", channel='music', loop=None, fadein=1.0)
     $ renpy.music.queue("music/battle/KantoTrainerLoop_Rock.ogg", channel='music', loop=True)
+    
+    # Red splash
     image Red_Splash:
         #xpos .20
         ypos 750
         zoom .75
         "/images/red_casual_1024.png"
     
+    # Blue splash
     image Blue_Splash:
         xpos .80
         ypos 750
         zoom .75
         "/images/blue_casual_1024.png"
-        
+    # vs word    
     image versus:
         ypos 600
         "images/versus.png"
         
+    # show Red at these coordinates    
     show Red_Splash:
         xalign -1 yalign 1.0
         ease 0.5 xalign -.1
+        
+    # show Blue at this coordinates
     show Blue_Splash:
         xalign 2.0 yalign 1.0
         ease 0.5 xalign 1.0
+        
+    # wait half a second
     pause 0.5
+    
+    # show the versus symbol
     show versus:
         xalign 0.5 yalign -0.5
         ease 0.5 yalign 0.5
+        
+    # wait a full second
     pause 1
     
+    # hide images
     hide Red_Splash
     hide Blue_Splash
     hide versus
+    
+    # call the combat label
     call .combat
 
+# "Combat is choosing the first pokemon to use/whenever a pokemon faints
 label .combat:
     if combat_turn == 0:
         menu:
@@ -111,36 +123,41 @@ label .fight:
          show screen pface("/images/Portraits/Red Square Casual Worried.png", 0.015, .653)
     
         
-    # Enemy Stats Frame
+    # Enemy Stats Frame. Will be expanded once rest of portraits are recieved for Blue
     show screen estats(ename, elevel, ehp, emaxhp, .83, .7)
     show screen eface("/images/Portraits/Blue Square Casual Neutral.png", 0.98, .653)
     return
         
-# Pokemon update label
+# Pokemon update label. Pokemon are set up here
 label .pokemon:
+    # get HP
     $ php = Red.party[currPoke].currHP
     $ ehp = Blue.party[eCurrPoke].currHP
+    # get image paths
     $ pokeImagePath = "/images/pokemon/" + Red.party[currPoke].name + ".png"
     $ eImagePath = "/images/pokemon/" + Blue.party[eCurrPoke].name + ".png"
     
-    image playerPokemon_RedvBlue:
+    # Red's pokemon
+    image playerPokemon:
         xalign .02
         yalign .02
         xpos 25
         ypos 100
         zoom .75
         pokeImagePath
-    show playerPokemon_RedvBlue
-        
-    image enemyPokemon_RedvBlue:
+    show playerPokemon
+    
+    # Blue's pokemon
+    image enemyPokemon:
         xalign .02
         yalign .02
         xpos 850
         ypos 150
         zoom .75
         eImagePath
-    show enemyPokemon_RedvBlue
-        
+    show enemyPokemon
+    
+    # checks if Red's pokemon's HP isn't 0. If it is, problems occur
     if php != 0:
         $ pname = Red.party[currPoke].name
         $ plevel = Red.party[currPoke].lvl
@@ -199,7 +216,7 @@ label .battle:
                     $ currPoke = 0
                     call .switch
                     "[Red.name]: Go, [pname]!"
-                    jump .enemyAttack
+                    jump .order
                 "[Red.party[1].name]" if numPoke >= 2 and Red.party[1] != Red.party[currPoke]:
                     call .fight
                     hide playerPokemon
@@ -207,7 +224,7 @@ label .battle:
                     $ currPoke = 1
                     call .switch
                     "[Red.name]: Go, [pname]!"
-                    jump .enemyAttack
+                    jump .order
                 "[Red.party[2].name]" if numPoke >= 3 and Red.party[2] != Red.party[currPoke]:
                     call .fight
                     hide playerPokemon
@@ -215,7 +232,7 @@ label .battle:
                     $ currPoke = 2
                     call .switch
                     "[Red.name]: Go, [pname]!"
-                    jump .enemyAttack
+                    jump .order
                 "[Red.party[3].name]" if numPoke >= 4 and Red.party[3] != Red.party[currPoke]:
                     call .fight
                     hide playerPokemon
@@ -223,7 +240,7 @@ label .battle:
                     $ currPoke = 3
                     call .switch
                     "[Red.name]: Go, [pname]!"
-                    jump .enemyAttack
+                    jump .order
                 "[Red.party[4].name]" if numPoke >= 5 and Red.party[4] != Red.party[currPoke]:
                     call .fight
                     hide playerPokemon
@@ -231,7 +248,7 @@ label .battle:
                     $ currPoke = 4
                     call .switch
                     "[Red.name]: Go, [pname]!"
-                    jump .enemyAttack
+                    jump .order
                 "[Red.party[5].name]" if numPoke == 6 and Red.party[5] != Red.party[currPoke]:
                     call .fight
                     hide playerPokemon
@@ -239,7 +256,7 @@ label .battle:
                     $ currPoke = 5
                     call .switch
                     "[Red.name]: Go, [pname]!"
-                    jump .enemyAttack
+                    jump .order
                 "Back":
                     jump .battle
             call .fight
@@ -382,7 +399,6 @@ label .enemyAttack:
     call .fight
     if Blue.party[eCurrPoke].status == 1:
         $ wokenup = Blue.party[eCurrPoke].sleep()
-        $ print(wokenup)
         if wokenup == False:
             call .fight
             "[ename] is asleep!"
@@ -501,17 +517,21 @@ label .switch:
     $ plevel = Red.party[currPoke].lvl
     $ pmaxhp = Red.party[currPoke].maxHP
     $ php = Red.party[currPoke].currHP
+    $ numskill = None
     $ switched = True
     call .fight
-    $ pokeImagePath = "/images/" + Red.party[currPoke].name + ".png"
+    $ pokeImagePath = "/images/pokemon/" + Red.party[currPoke].name + ".png"
+    hide playerPokemon
     image playerPokemon:
         xalign .02
         yalign .02
-        xpos 15
-        ypos 180
+        xpos 25
+        ypos 100
+        zoom .75
         pokeImagePath
     show playerPokemon
     call .fight
+    jump .order
     
 label .order:
     # Foe picking attack
@@ -534,10 +554,13 @@ label .order:
     $ target_name = target.name
     
     # Player attack
-    $ pskill = Red.party[currPoke].moves[numSkill]
+    if switched == False:
+        $ pskill = Red.party[currPoke].moves[numSkill]
     
     python:
-        if pskill.priority > eskill.priority:
+        if switched == True:
+            order = [ 2 ]
+        elif pskill.priority > eskill.priority:
             order = [1 , 2]
         elif pskill.priority < eskill.priority:
             order = [2 , 1]
