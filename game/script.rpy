@@ -7,4 +7,5 @@
 
 label start:
     scene
-    call splash
+    jump RedVBlue
+    "Demo ended"

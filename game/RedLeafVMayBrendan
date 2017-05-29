@@ -1,19 +1,20 @@
-label RedVBlue:
+label RedLeafVMayBrendan:
     
     python:   
         #Declarations. Ideally you would set these early in the game. Not completely done.
         
         # Moves: name, type, spec, damage, accuracy, effect
-        #Tackle = Moves("Tackle", 0, 0, 35, 100, 0, 0)
-        #Tail_Whip = Moves("Tail Whip", 0, 0, 0, 100, 1, 0)
-        #Bubble = Moves("Bubble", 2, 1, 40, 100, 0, 0)
-        #Thunder_Shock = Moves("Thunder Shock", 3, 1, 40, 100, 0, 0)
-        #Razor_Leaf = Moves("Ember", 1, 1, 55, 100, 23, 0)
-        # name, type1, type2, base_HP, base_pAtk, base_sAtk, base_pDef, base_sDef, base_speed, catchRate
+        Tackle = Moves("Tackle", 0, 0, 35, 100, 0, 0)
+        Tail_Whip = Moves("Tail Whip", 0, 0, 0, 100, 11, 0)
+        Bubble = Moves("Bubble", 2, 1, 40, 100, 0, 0)
+        Thunder_Shock = Moves("Thunder Shock", 3, 1, 40, 100, 0, 0)
+        Razor_Leaf = Moves("Razor Leaf", 3, 1, 55, 100, 0, 0)
+        
+        # name, type1, type2, lvl, base_HP, base_pAtk, base_sAtk, base_pDef, base_sDef, base_speed, status, catchRate
+        Squirtle = Pokemon("Squirtle", 2, 18, 44, 48, 50, 65, 64, 43, 0, 3)
+        Charmander = Pokemon("Charmander", 1, 18, 39, 52, 60, 43, 50, 65, 0, 3)
         Squirtle.lvl = 5
         Charmander.lvl = 5
-        Squirtle.calcStats()
-        Charmander.calcStats()
         
         Red = Trainer("Red", 1)
         Blue = Trainer("Blue", 2)
@@ -28,7 +29,7 @@ label RedVBlue:
         Red.party[0].addMove(Razor_Leaf)
         #Blue.party[0].addMove(Tackle)
         Blue.party[0].addMove(Tail_Whip)
-        Blue.party[0].addMove(Water_Gun)
+        Blue.party[0].addMove(Bubble)
         
         # Number of pokemon in Red's party.
         numPoke = Red.numPoke()
@@ -159,8 +160,6 @@ label .battle:
     $ numSkill = 0
     $ speedTest = Red.party[currPoke].checkSpeed(Blue.party[eCurrPoke])
     $ switched = False
-    $ print(Red.party[currPoke].speed)
-    $ print(Blue.party[eCurrPoke].speed)
     $ print(speedTest)
     
     python:
@@ -189,8 +188,11 @@ label .battle:
                     $ numSkill = 3
                 "Back":
                     jump .battle
-            jump .order
-        "Switch" if len(Red.party) > 1:
+            if speedTest == True:
+                jump .playerAttack
+            elif speedTest == False:
+                jump .enemyAttack
+        "Switch":
             menu:
                 "[Red.party[0].name]" if numPoke >= 1 and Red.party[0] != Red.party[currPoke]:
                     call .fight
@@ -271,7 +273,6 @@ label .battle:
         "Run Away" if Blue.ID == 0:
             "Got away safely!"
             #jump to the next label
-            
 label .hideImage:
     hide playerPokemon
 
@@ -346,7 +347,20 @@ label .playerAttack:
         #elif Blue.party[eCurrPoke].currPDef == Blue.party[eCurrPoke].pDef - 6:
         #    "You can't lower your opponents defense anymore!"
 
-    $ Red.party[currPoke].effectiveMessage(Red.party[currPoke].moves[numSkill])
+    if Red.party[currPoke].isCrit == True:
+        call .fight
+        "Critical strike!"
+    if Red.party[currPoke].dmgMod > 1:
+        call .fight
+        play audio "/se/supereffective.ogg"
+        "It's super effective!"
+    if Red.party[currPoke].dmgMod < 1 and Red.party[currPoke].dmgMod != 0:
+        call .fight
+        play audio "/se/notveryeffective.ogg"
+        "It's not very effective..."
+    if Red.party[currPoke].dmgMod == 1:
+        play audio "/se/normaldamage.ogg"
+        call .fight
         
 
         
@@ -367,18 +381,12 @@ label .playerAttack:
         else:
             call .e_defeat
         
-    $ order.pop(0)
-    if not order:
-        jump .endTurn
-    elif(order[0] == 1):
-        jump .playerAttack
-    elif(order[0] == 2):
+    if speedTest == True and switched == False:
         jump .enemyAttack
+    else:
+        jump .endTurn
         
 label .enemyAttack:
-    $ skill = Blue.party[eCurrPoke].moves[pickedMove]
-    $ skill_name = Blue.party[eCurrPoke].moves[pickedMove].name
-    
     call .fight
     if Blue.party[eCurrPoke].status == 1:
         $ wokenup = Blue.party[eCurrPoke].sleep()
@@ -393,7 +401,23 @@ label .enemyAttack:
         elif wokenup == True:
             call .fight
             "[ename] woke up!"    
-        
+    $ numMoves = len(Blue.party[eCurrPoke].moves) - 1
+    $ pickedMove = randint(0, numMoves)
+    
+    #python:
+    #    while 1:
+    #        if Blue.party[eCurrPoke].moves[pickedMove].effect == 0:
+    #            break
+    #        elif Red.party[currPoke].currPDef > Red.party[currPoke].pDef - 6 and Blue.party[eCurrPoke].moves[pickedMove].effect == 1:
+    #            break
+    #        else:
+    #            pickedMove = randint(0, numMoves)
+    $ skill = Blue.party[eCurrPoke].moves[pickedMove]
+    $ skill_name = Blue.party[eCurrPoke].moves[pickedMove].name
+    $ poke_name = Blue.party[eCurrPoke].name
+    $ target = Red.party[currPoke]
+    $ target_name = target.name
+    
     "[poke_name] used [skill_name]!"
     if Blue.party[eCurrPoke].status == 5:
         $ froz = Blue.party[eCurrPoke].freeze()
@@ -432,9 +456,21 @@ label .enemyAttack:
         #elif Red.party[currPoke].currPDef == Red.party[currPoke].pDef - 7:
         #    "Your defense can't go any lower!"
 
-    $ Blue.party[eCurrPoke].effectiveMessage(skill)
-    
-    
+    if Blue.party[eCurrPoke].isCrit == True:
+        call .fight
+        "Critical strike!"
+    if Blue.party[eCurrPoke].dmgMod > 1:
+        call .fight
+        play audio "/se/supereffective.ogg"
+        "It's super effective!"
+    if Blue.party[eCurrPoke].dmgMod < 1 and Blue.party[eCurrPoke].dmgMod != 0:
+        call .fight
+        play audio "/se/notveryeffective.ogg"
+        "It's not very effective..."
+    if Blue.party[eCurrPoke].dmgMod == 1:
+        call .fight
+        play audio "/se/normaldamage.ogg"
+        
     $ checkPHP = Red.party[currPoke].currHP    
     if checkPHP < 1:
         $ php = 0
@@ -449,16 +485,28 @@ label .enemyAttack:
         else:
             call .p_defeat
         
-    $ order.pop(0)
-    if not order:
+    if speedTest == True:
         jump .endTurn
-    elif(order[0] == 1):
+    elif speedTest == False and switched == False:
         jump .playerAttack
-    elif(order[0] == 2):
-        jump .enemyAttack
+    elif speedTest == False and switched == True:
+        jump .endTurn
 
 label .endTurn:
-    $ Red.party[currPoke].endTurn()
+    if Red.party[currPoke].status == 2:
+        call .fight
+        "[pname] is inflicted by poison!"
+        $ Red.party[currPoke].poison()
+    if Red.party[currPoke].status == 3:
+        call .fight
+        "[pname] is inflicted by burn!"
+        $ Red.party[currPoke].burn()
+    if Red.party[currPoke].status == 4:
+        call .fight
+        "[pname] is badly poisoned!"
+        $ Red.party[currPoke].toxic()
+    if Red.party[currPoke].status == 6:
+        $ Red.party[currPoke].currSpeed *= .5
 
     $ checkPHP = Red.party[currPoke].currHP    
     if checkPHP < 1:
@@ -474,8 +522,21 @@ label .endTurn:
         else:
             call .p_defeat
   
-    $ Blue.party[eCurrPoke].endTurn()
-    
+    if Blue.party[eCurrPoke].status == 2:
+        call .fight
+        "[ename] is inflicted by poison!"
+        $ Blue.party[eCurrPoke].poison()
+    if Blue.party[eCurrPoke].status == 3:
+        call .fight
+        "[ename] is inflicted by burn!"
+        $ Blue.party[eCurrPoke].burn()
+    if Blue.party[eCurrPoke].status == 4:
+        call .fight
+        "[ename] is badly poisoned!"
+        $ Blue.party[eCurrPoke].toxic()
+    if Blue.party[eCurrPoke].status == 6:
+        $ Blue.party[eCurrPoke].currSpeed *= .5
+
     $ checkEHP = Blue.party[eCurrPoke].currHP    
     if checkEHP < 1:
         $ ehp = 0
@@ -512,42 +573,3 @@ label .switch:
         pokeImagePath
     show playerPokemon
     call .fight
-    
-label .order:
-    # Foe picking attack
-    # AI section, minimal for Blue right now
-    $ numMoves = len(Blue.party[eCurrPoke].moves) - 1
-    $ pickedMove = randint(0, numMoves)
-    python:
-        while 1:
-            if Blue.party[eCurrPoke].moves[pickedMove].effect == 0:
-                break
-            elif Red.party[currPoke].currPDef > Red.party[currPoke].pDef - 6 and Blue.party[eCurrPoke].moves[pickedMove].effect == 1:
-                break
-            else:
-                pickedMove = randint(0, numMoves)
-    
-    $ eskill = Blue.party[eCurrPoke].moves[pickedMove]
-    $ eskill_name = Blue.party[eCurrPoke].moves[pickedMove].name
-    $ poke_name = Blue.party[eCurrPoke].name
-    $ target = Red.party[currPoke]
-    $ target_name = target.name
-    
-    # Player attack
-    $ pskill = Red.party[currPoke].moves[numSkill]
-    
-    python:
-        if pskill.priority > eskill.priority:
-            order = [1 , 2]
-        elif pskill.priority < eskill.priority:
-            order = [2 , 1]
-        elif pskill.priority == eskill.priority:
-            if speedTest == True:
-                order = [1 , 2]
-            else:
-                order = [2 , 1]
-                
-    if(order[0] == 1):
-        jump .playerAttack
-    elif(order[0] == 2):
-        jump .enemyAttack

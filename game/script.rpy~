@@ -6,4 +6,6 @@
 # The game starts here.
 
 label start:
-    call splash
+    scene
+    call RedVLeaf
+    "Demo ended"

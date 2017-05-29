@@ -1,53 +1,61 @@
-init 1 python:
+label RedVBlue:
     
-    #Declarations. Ideally you would set these early in the game. Not completely done.
-    Tackle = Moves("Tackle", 35, 0, 0, 35, 100, 0)
-    Tail_Whip = Moves("Tail Whip", 35, 0, 0, 0, 100, 1)
-    Bubble = Moves("Bubble", 35, 2, 1, 40, 100, 0)
-    Charmander = Pokemon("Charmander", 1, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0, 3)
-    Bulbasaur = Pokemon("Bulbasaur", 4, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0, 3)
-    Squirtle = Pokemon("Squirtle", 2, 18, 5, 20, 20, 11, 11, 13, 12, 10, 0, 100)
-    Red = Trainer("Red", 1)
-    Blue = Trainer("Blue", 0)
-    
-    # Catching members. Ignore for now
-    Red.catchMember(Charmander)
-    Blue.catchMember(Squirtle)
+    python:   
+        #Declarations. Ideally you would set these early in the game. Not completely done.
+        
+        # Moves: name, type, spec, damage, accuracy, effect
+        Tackle = Moves("Tackle", 0, 0, 35, 100, 0)
+        Tail_Whip = Moves("Tail Whip", 0, 0, 0, 100, 1)
+        Bubble = Moves("Bubble", 2, 1, 40, 100, 0)
+        Thunder_Shock = Moves("Thunder Shock", 3, 1, 40, 100, 0)
+        Razor_Leaf = Moves("Razor Leaf", 3, 1, 55, 100, 0)
+        
+        # name, type1, type2, lvl, maxHP, currHP, pAtk, sAtk, pDef, sDef, speed, status, catchRate
+        Charmander = Pokemon("Charmander", 1, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0, 3)
+        Bulbasaur = Pokemon("Bulbasaur", 4, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0, 3)
+        Squirtle = Pokemon("Squirtle", 2, 18, 5, 20, 20, 11, 11, 13, 12, 10, 0, 100)
+        Pikachu = Pokemon("Pikachu", 3, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0, 3)
+        Chespin = Pokemon("Chespin", 4, 18, 5, 21, 21, 11, 13, 11, 13, 11, 0, 3)
+        
+        Red = Trainer("Red", 1)
+        Blue = Trainer("Blue", 2)
+        
+        # Catching members. Ignore for now
+        Red.catchMember(Chespin)
+        Blue.catchMember(Squirtle)
+        
+        # Giving pokemon moves
+        Red.party[0].addMove(Tackle)
+        Red.party[0].addMove(Tail_Whip)
+        Red.party[0].addMove(Razor_Leaf)
+        Blue.party[0].addMove(Tackle)
+        Blue.party[0].addMove(Tail_Whip)
+        Blue.party[0].addMove(Bubble)
+        
+        # Number of pokemon in Red's party.
+        numPoke = Red.numPoke()
+        # Setting index for Blue's pokemon
+        eCurrPoke = 0
+            
+        combat_turn = 0
+            
+        Red.pokeBalls = 3
+        Red.greatBalls = 2
+        Red.ultraBalls = 1
+            
+    jump .splash
 
-    # Giving pokemon moves
-    Red.party[0].addMove(Tackle)
-    Red.party[0].addMove(Tail_Whip)
-    Blue.party[0].addMove(Tackle)
-    Blue.party[0].addMove(Tail_Whip)
-    Blue.party[0].addMove(Bubble)
-    
-    # Number of pokemon in Red's party.
-    
-    # Setting index for Blue's pokemon
-    eCurrPoke = 0
-    
-    def face_frame(img, **properties):
-        ui.frame(xfill=False, yminimum=0, **properties)
-        ui.image(img,**properties)
-
-    combat_turn = 0
-    
-    Red.pokeBalls = 3
-    Red.greatBalls = 2
-    Red.ultraBalls = 1
-
-label splash:
+label .splash:
 
     $ renpy.music.queue("music/battle/KantoTrainerStart_Rock.ogg", channel='music', loop=None, fadein=1.0)
     $ renpy.music.queue("music/battle/KantoTrainerLoop_Rock.ogg", channel='music', loop=True)
-    $ numPoke = Red.numPoke()
     image Red_Splash:
         #xpos .20
         ypos 750
         zoom .75
         "/images/red_casual_1024.png"
     
-    image Enemy_Splash:
+    image Blue_Splash:
         xpos .80
         ypos 750
         zoom .75
@@ -60,7 +68,7 @@ label splash:
     show Red_Splash:
         xalign -1 yalign 1.0
         ease 0.5 xalign -.1
-    show Enemy_Splash:
+    show Blue_Splash:
         xalign 2.0 yalign 1.0
         ease 0.5 xalign 1.0
     pause 0.5
@@ -70,11 +78,11 @@ label splash:
     pause 1
     
     hide Red_Splash
-    hide Enemy_Splash
+    hide Blue_Splash
     hide versus
-    call combat
+    call .combat
 
-label combat:
+label .combat:
     if combat_turn == 0:
         menu:
             "Choose your Pokemon:"
@@ -90,19 +98,19 @@ label combat:
                 $ currPoke = 4
             "[Red.party[5].name]" if numPoke == 6:
                 $ currPoke = 5
-        jump pokemon
+        jump .pokemon
 
-# Frame update
-label fight:
+# Frames update
+label .fight:
 
     # Player Stats Frame
     $ stats_frame(pname, plevel, php, pmaxhp, xalign=.17, yalign=.7)
     if Red.party[currPoke].currHP >= round(Red.party[currPoke].maxHP * .75):
-        $ face_frame("/images/Portraits/Red Square Casual Happy.png", xalign = 0.02, yalign=.653, zoom=.25)
+        $ face_frame("/images/Portraits/Red Square Casual Happy.png", xalign = 0.015, yalign=.653, zoom=.25)
     if Red.party[currPoke].currHP <= round(Red.party[currPoke].maxHP * .75) and Red.party[currPoke].currHP > Red.party[currPoke].maxHP * .25:
-        $ face_frame("/images/Portraits/Red Square Casual Neutral.png", xalign = 0.02, yalign=.653, zoom=.25)
+        $ face_frame("/images/Portraits/Red Square Casual Neutral.png", xalign = 0.015, yalign=.653, zoom=.25)
     elif Red.party[currPoke].currHP <= round(Red.party[currPoke].maxHP * .25):
-        $ face_frame("/images/Portraits/Red Square Casual Worried.png", xalign = 0.02, yalign=.653, zoom=.25)
+        $ face_frame("/images/Portraits/Red Square Casual Worried.png", xalign = 0.015, yalign=.653, zoom=.25)
     
         
     # Enemy Stats Frame
@@ -111,27 +119,29 @@ label fight:
     return
         
 # Pokemon update label
-label pokemon:
+label .pokemon:
     $ php = Red.party[currPoke].currHP
     $ ehp = Blue.party[eCurrPoke].currHP
-    $ pokeImagePath = "/images/" + Red.party[currPoke].name + ".png"
-    $ eImagePath = "/images/" + Blue.party[eCurrPoke].name + ".png"
+    $ pokeImagePath = "/images/pokemon/" + Red.party[currPoke].name + ".png"
+    $ eImagePath = "/images/pokemon/" + Blue.party[eCurrPoke].name + ".png"
     
-    image playerPokemon:
+    image playerPokemon_RedvBlue:
         xalign .02
         yalign .02
-        xpos 15
-        ypos 180
+        xpos 25
+        ypos 100
+        zoom .75
         pokeImagePath
-    show playerPokemon
+    show playerPokemon_RedvBlue
         
-    image enemyPokemon:
+    image enemyPokemon_RedvBlue:
         xalign .02
         yalign .02
-        xpos 1000
-        ypos 180
+        xpos 850
+        ypos 150
+        zoom .75
         eImagePath
-    show enemyPokemon
+    show enemyPokemon_RedvBlue
         
     if php != 0:
         $ pname = Red.party[currPoke].name
@@ -144,8 +154,8 @@ label pokemon:
         $ emaxhp = Blue.party[eCurrPoke].maxHP
             
             
-label battle:
-    call fight
+label .battle:
+    call .fight
     $ combat_turn += 1
     $ skillChoice = len(Red.party[currPoke].moves)
     $ numSkill = 0
@@ -166,7 +176,7 @@ label battle:
     menu:
         "What would you like to do?"
         "Fight":
-            call fight
+            call .fight
             menu:
                 "What should [pname] do?"
                 "[skill1_name]" if skillChoice >= 1:
@@ -178,65 +188,65 @@ label battle:
                 "[skill4_name]" if skillChoice >= 4:
                     $ numSkill = 3
                 "Back":
-                    jump battle
+                    jump .battle
             if speedTest == True:
-                jump playerAttack
+                jump .playerAttack
             elif speedTest == False:
-                jump enemyAttack
+                jump .enemyAttack
         "Switch":
             menu:
                 "[Red.party[0].name]" if numPoke >= 1 and Red.party[0] != Red.party[currPoke]:
-                    call fight
+                    call .fight
                     hide playerPokemon
                     "[Red.name]: [pname], come back!"
                     $ currPoke = 0
-                    call switch
+                    call .switch
                     "[Red.name]: Go, [pname]!"
-                    jump enemyAttack
+                    jump .enemyAttack
                 "[Red.party[1].name]" if numPoke >= 2 and Red.party[1] != Red.party[currPoke]:
-                    call fight
+                    call .fight
                     hide playerPokemon
                     "[Red.name]: [pname], come back!"
                     $ currPoke = 1
-                    call switch
+                    call .switch
                     "[Red.name]: Go, [pname]!"
-                    jump enemyAttack
+                    jump .enemyAttack
                 "[Red.party[2].name]" if numPoke >= 3 and Red.party[2] != Red.party[currPoke]:
-                    call fight
+                    call .fight
                     hide playerPokemon
                     "[Red.name]: [pname], come back!"
                     $ currPoke = 2
-                    call switch
+                    call .switch
                     "[Red.name]: Go, [pname]!"
-                    jump enemyAttack
+                    jump .enemyAttack
                 "[Red.party[3].name]" if numPoke >= 4 and Red.party[3] != Red.party[currPoke]:
-                    call fight
+                    call .fight
                     hide playerPokemon
                     "[Red.name]: [pname], come back!"
                     $ currPoke = 3
-                    call switch
+                    call .switch
                     "[Red.name]: Go, [pname]!"
-                    jump enemyAttack
+                    jump .enemyAttack
                 "[Red.party[4].name]" if numPoke >= 5 and Red.party[4] != Red.party[currPoke]:
-                    call fight
+                    call .fight
                     hide playerPokemon
                     "[Red.name]: [pname], come back!"
                     $ currPoke = 4
-                    call switch
+                    call .switch
                     "[Red.name]: Go, [pname]!"
-                    jump enemyAttack
+                    jump .enemyAttack
                 "[Red.party[5].name]" if numPoke == 6 and Red.party[5] != Red.party[currPoke]:
-                    call fight
+                    call .fight
                     hide playerPokemon
                     "[Red.name]: [pname], come back!"
                     $ currPoke = 5
-                    call switch
+                    call .switch
                     "[Red.name]: Go, [pname]!"
-                    jump enemyAttack
+                    jump .enemyAttack
                 "Back":
-                    jump battle
-            call fight
-            jump enemyAttack
+                    jump .battle
+            call .fight
+            jump .enemyAttack
         "Catch" if Blue.ID == 0:
             menu:
                 "Use Poke Ball ([Red.pokeBalls] left)" if Red.pokeBalls > 0:
@@ -249,72 +259,115 @@ label battle:
                     $ bonus = 3
                     $ Red.ultraBalls = Red.ultraBalls - 1
                 "Back":
-                    jump battle
+                    jump .battle
             $ attemptCatch = Red.tryCatch(Blue.party[eCurrPoke].status, Blue.party[eCurrPoke].currHP, Blue.party[eCurrPoke].maxHP, Blue.party[eCurrPoke].catchRate, bonus)
             if attemptCatch == True:
                  $ switched = True
                  $ Red.catchMember(Blue.party[eCurrPoke])
                  $ print(len(Red.party))
                  "You caught the Pokemon!"
-                 jump e_defeat
+                 jump .e_defeat
             else:
                  $ switched = True
                  "Darn! Didn't catch it!"
-                 jump enemyAttack
-
-
-label hideImage:
+                 jump .enemyAttack
+        "Run Away" if Blue.ID == 0:
+            "Got away safely!"
+            #jump to the next label
+label .hideImage:
     hide playerPokemon
 
-label enemyHideImage:
+label .enemyHideImage:
     hide enemyPokemon
     
-label e_defeat:
+label .e_defeat:
      scene black with dissolve
      centered "You win!"
      $  Red.partyHeal()
      $  Blue.partyHeal()
      $  renpy.full_restart()
 
-label p_defeat:
+label .p_defeat:
      scene black with dissolve
      centered "You lose!"
      $  Red.partyHeal()
      $  Blue.partyHeal()
      $ renpy.full_restart()     
      
-label playerAttack:
-    call fight
+label .playerAttack:
+    call .fight
+    if Red.party[currPoke].status == 1:
+        $ wokenup = Red.party[currPoke].sleep()
+        if wokenup == False:
+            call .fight
+            "[pname] is asleep!"
+            if speedTest == True and switched == False:
+                jump .enemyAttack
+            else:
+                jump .endTurn
+        elif wokenup == True:
+            call .fight
+            "[pname] woke up!"
     $ skill_name = Red.party[currPoke].moves[numSkill].name
-    $ face_frame("/images/Portraits/Red Square Casual Attacking.png", xalign = 0.02, yalign=.653, zoom=.25)
+    $ face_frame("/images/Portraits/Red Square Casual Attacking.png", xalign = 0.015, yalign=.653, zoom=.25)
     "[pname] used [skill_name]!"
+    if Red.party[currPoke].status == 5:
+        $ froz = Red.party[currPoke].freeze()
+        if froz == False:
+            call .fight
+            "[pname] is frozen!"
+            if speedTest == True and switched == False:
+                jump .enemyAttack
+            else:
+                jump .endTurn
+        else:
+            call .fight
+            "[pname] is frozen no longer!"
+    if Red.party[currPoke].status == 6:
+        $ para = Red.party[currPoke].paralysis()
+        if para == False:
+            call .fight
+            "[pname] is paralysed! It can't move!"
+            if speedTest == True and switched == False:
+                jump .enemyAttack
+            else:
+                jump .endTurn
     $ Red.party[currPoke].attack(Red.party[currPoke].moves[numSkill], Blue.party[eCurrPoke])
     if Blue.party[eCurrPoke].currHP > 0:
         $ ehp = Blue.party[eCurrPoke].currHP
-        call fight
+        call .fight
     else:
         $ ehp = 0
-        call fight
+        call .fight
         
     if Red.party[currPoke].moves[numSkill].effect == 1:
-        call fight
+        call .fight
         if Blue.party[eCurrPoke].currPDef > Blue.party[eCurrPoke].pDef - 6:
             "You lowered your opponents defense!"
         elif Blue.party[eCurrPoke].currPDef == Blue.party[eCurrPoke].pDef - 6:
             "You can't lower your opponents defense anymore!"
 
     if Red.party[currPoke].isCrit == True:
-        call fight
+        call .fight
         "Critical strike!"
     if Red.party[currPoke].dmgMod > 1:
-        call fight
+        call .fight
+        play audio "/se/supereffective.ogg"
         "It's super effective!"
+    if Red.party[currPoke].dmgMod < 1 and Red.party[currPoke].dmgMod != 0:
+        call .fight
+        play audio "/se/notveryeffective.ogg"
+        "It's not very effective..."
+    if Red.party[currPoke].dmgMod == 1:
+        play audio "/se/normaldamage.ogg"
+        call .fight
+        
 
         
     $ checkEHP = Blue.party[eCurrPoke].currHP    
     if checkEHP <= 0:
         $ ehp = 0
-        call fight
+        call .fight
         "Enemy [ename] fainted!"
         hide enemyPokemon
         $ Blue.knockOut(eCurrPoke)
@@ -323,21 +376,31 @@ label playerAttack:
         if enemyPoke > 0:
             $ ename = Blue.party[eCurrPoke].name
             "Blue: Go, [ename]!"
-            call pokemon
-            jump battle
+            call .pokemon
+            jump .battle
         else:
-            call e_defeat
+            call .e_defeat
         
     if speedTest == True and switched == False:
-        $print (switched)
-        jump enemyAttack
+        jump .enemyAttack
     else:
-        call pokemon
-        jump battle
+        jump .endTurn
         
-label enemyAttack:
-    call fight
-    
+label .enemyAttack:
+    call .fight
+    if Blue.party[eCurrPoke].status == 1:
+        $ wokenup = Blue.party[eCurrPoke].sleep()
+        $ print(wokenup)
+        if wokenup == False:
+            call .fight
+            "[ename] is asleep!"
+            if speedTest == True and switched == False:
+                jump .endTurn
+            else:
+                jump .playerAttack
+        elif wokenup == True:
+            call .fight
+            "[ename] woke up!"    
     $ numMoves = len(Blue.party[eCurrPoke].moves) - 1
     $ pickedMove = randint(0, numMoves)
     python:
@@ -355,59 +418,150 @@ label enemyAttack:
     $ target_name = target.name
     
     "[poke_name] used [skill_name]!"
+    if Blue.party[eCurrPoke].status == 5:
+        $ froz = Blue.party[eCurrPoke].freeze()
+        if froz == False:
+            call .fight
+            "[ename] is frozen!"
+            if speedTest == True and switched == False:
+                jump .endTurn
+            else:
+                jump .playerAttack
+        else:
+            call .fight
+            "[ename] is frozen no longer!"
+    if Blue.party[eCurrPoke].status == 6:
+        $ para = Blue.party[eCurrPoke].paralysis()
+        if para == False:
+            call .fight
+            "[ename] is paralysed! It can't move!"
+            if speedTest == True and switched == False:
+                jump .endTurn
+            else:
+                jump .playerAttack
     $ Blue.party[eCurrPoke].attack(skill, target)
     if Red.party[currPoke].currHP > 0:
        $  php = Red.party[currPoke].currHP
-       call fight
+       call .fight
     else:
         $ php = 0
-        call fight
+        call .fight
 
     if Blue.party[eCurrPoke].moves[pickedMove].effect == 1:
-        call fight
+        call .fight
         if Red.party[currPoke].currPDef >= Red.party[currPoke].pDef - 6:
             "Your opponent lowered your defense!"
         elif Red.party[currPoke].currPDef == Red.party[currPoke].pDef - 7:
             "Your defense can't go any lower!"
 
     if Blue.party[eCurrPoke].isCrit == True:
-        call fight
+        call .fight
         "Critical strike!"
     if Blue.party[eCurrPoke].dmgMod > 1:
-        call fight
+        call .fight
+        play audio "/se/supereffective.ogg"
         "It's super effective!"
+    if Blue.party[eCurrPoke].dmgMod < 1 and Blue.party[eCurrPoke].dmgMod != 0:
+        call .fight
+        play audio "/se/notveryeffective.ogg"
+        "It's not very effective..."
+    if Blue.party[eCurrPoke].dmgMod == 1:
+        call .fight
+        play audio "/se/normaldamage.ogg"
         
     $ checkPHP = Red.party[currPoke].currHP    
     if checkPHP <= 0:
         $ php = 0
-        call fight
+        call .fight
         "[target_name] fainted!"
         hide playerPokemon
         $ Red.knockOut(currPoke)
         $ numPoke = Red.numPoke()
         if numPoke > 0:
             $ combat_turn = 0
-            jump combat
+            jump .combat
         else:
-            call p_defeat
+            call .p_defeat
         
     if speedTest == True:
-        $ print (speedTest)
-        call pokemon
-        jump battle
+        jump .endTurn
     elif speedTest == False and switched == False:
-        jump playerAttack
+        jump .playerAttack
     elif speedTest == False and switched == True:
-        call pokemon
-        jump battle
+        jump .endTurn
+
+label .endTurn:
+    if Red.party[currPoke].status == 2:
+        call .fight
+        "[pname] is inflicted by poison!"
+        $ Red.party[currPoke].poison()
+    if Red.party[currPoke].status == 3:
+        call .fight
+        "[pname] is inflicted by burn!"
+        $ Red.party[currPoke].burn()
+    if Red.party[currPoke].status == 4:
+        call .fight
+        "[pname] is badly poisoned!"
+        $ Red.party[currPoke].toxic()
+    if Red.party[currPoke].status == 6:
+        $ Red.party[currPoke].currSpeed *= .5
+
+    $ checkPHP = Red.party[currPoke].currHP    
+    if checkPHP <= 0:
+        $ php = 0
+        call .fight
+        "[target_name] fainted!"
+        hide playerPokemon
+        $ Red.knockOut(currPoke)
+        $ numPoke = Red.numPoke()
+        if numPoke > 0:
+            $ combat_turn = 0
+            jump .combat
+        else:
+            call .p_defeat
+  
+    if Blue.party[eCurrPoke].status == 2:
+        call .fight
+        "[ename] is inflicted by poison!"
+        $ Blue.party[eCurrPoke].poison()
+    if Blue.party[eCurrPoke].status == 3:
+        call .fight
+        "[ename] is inflicted by burn!"
+        $ Blue.party[eCurrPoke].burn()
+    if Blue.party[eCurrPoke].status == 4:
+        call .fight
+        "[ename] is badly poisoned!"
+        $ Blue.party[eCurrPoke].toxic()
+    if Blue.party[eCurrPoke].status == 6:
+        $ Blue.party[eCurrPoke].currSpeed *= .5
+
+    $ checkEHP = Blue.party[eCurrPoke].currHP    
+    if checkEHP <= 0:
+        $ ehp = 0
+        call .fight
+        "Enemy [ename] fainted!"
+        hide enemyPokemon
+        $ Blue.knockOut(eCurrPoke)
+        $ enemyPoke = Blue.numPoke()
         
-label switch:
+        if enemyPoke > 0:
+            $ ename = Blue.party[eCurrPoke].name
+            "Blue: Go, [ename]!"
+            call .pokemon
+            jump .battle
+        else:
+            call .e_defeat
+        
+    call .pokemon
+    jump .battle
+
+label .switch:
     $ pname = Red.party[currPoke].name
     $ plevel = Red.party[currPoke].lvl
     $ pmaxhp = Red.party[currPoke].maxHP
     $ php = Red.party[currPoke].currHP
     $ switched = True
-    call fight
+    call .fight
     $ pokeImagePath = "/images/" + Red.party[currPoke].name + ".png"
     image playerPokemon:
         xalign .02
@@ -416,4 +570,4 @@ label switch:
         ypos 180
         pokeImagePath
     show playerPokemon
-    call fight
+    call .fight

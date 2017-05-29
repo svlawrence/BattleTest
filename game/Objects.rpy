@@ -1,4 +1,7 @@
-init -2 python:
+init -999:
+    define n = Character("")
+
+init -998 python:
 
     from __future__ import division
     from random import randint
@@ -33,33 +36,53 @@ init -2 python:
     class Pokemon(object):
 
         # Since python doesn't use constructors, this is basically the same thing
-        def __init__(self, name, type1, type2, lvl, maxHP, currHP, pAtk, sAtk, pDef, sDef, speed, status, catchRate):
+        def __init__(self, name, type1, type2, lvl, base_HP, base_pAtk, base_sAtk, base_pDef, base_sDef, base_speed, catchRate):
             self.name = name
+            self.base_HP = base_HP
+            self.base_pAtk = base_pAtk
+            self.base_sAtk = base_sAtk
+            self.base_pDef = base_pDef
+            self.base_sDef = base_sDef
+            self.base_speed = base_speed
             self.type1 = pokemon_types[type1]
             self.type2 = pokemon_types[type2]
-            self.lvl = lvl
-            self.maxHP = maxHP
-            self.currHP = currHP
-            self.pAtk = pAtk
-            self.currPAtk = copy.deepcopy(pAtk)
-            self.sAtk = sAtk
-            self.currSAtk = copy.deepcopy(sAtk)
-            self.pDef = pDef
-            self.currPDef = copy.deepcopy(pDef)
-            self.sDef = sDef
-            self.currSDef = copy.deepcopy(sDef)
-            self.speed = speed
-            self.currSpeed = copy.deepcopy(speed)
-            self.status = status
+            self.lvl = 5
+            self.maxHP = ((2 * base_HP) * self.lvl/100) + 10 + self.lvl
+            self.currHP = copy.deepcopy(self.maxHP)
+            self.pAtk = (2 * base_pAtk) * (self.lvl/100) + 5
+            self.currPAtk = copy.deepcopy(self.pAtk)
+            self.sAtk = (2 * base_sAtk) * (self.lvl/100) + 5
+            self.currSAtk = copy.deepcopy(self.sAtk)
+            self.pDef = (2 * base_pDef) * (self.lvl/100) + 5
+            self.currPDef = copy.deepcopy(self.pDef)
+            self.sDef = (2 * base_sDef) * (self.lvl/100) + 5
+            self.currSDef = copy.deepcopy(self.sDef)
+            self.speed = (2 * base_speed) * (self.lvl/100) + 5
+            self.currSpeed = copy.deepcopy(self.speed)
+            self.status = 0
             self.moves = []
             self.dmgMod = 1
             self.isCrit = False
             self.catchRate = catchRate
             self.badPoison = 1
-
+            
         def addMove(self, move):
             if len(self.moves) < 4:
                 self.moves.append(copy.deepcopy(move))
+                
+        def calcStats(self):
+            self.maxHP = ((2 * self.base_HP) * self.lvl/100) + 10 + self.lvl
+            self.currHP = copy.deepcopy(self.maxHP)
+            self.pAtk = (2 * self.base_pAtk) * (self.lvl/100) + 5
+            self.currPAtk = copy.deepcopy(self.pAtk)
+            self.sAtk = (2 * self.base_sAtk) * (self.lvl/100) + 5
+            self.currSAtk = copy.deepcopy(self.sAtk)
+            self.pDef = (2 * self.base_pDef) * (self.lvl/100) + 5
+            self.currPDef = copy.deepcopy(self.pDef)
+            self.sDef = (2 * self.base_sDef) * (self.lvl/100) + 5
+            self.currSDef = copy.deepcopy(self.sDef)
+            self.speed = (2 * self.base_speed) * (self.lvl/100) + 5
+            self.currSpeed = copy.deepcopy(self.speed)
 
         # Checks pokemon speed to determine order
         def checkSpeed(self, target):
@@ -74,6 +97,12 @@ init -2 python:
                 elif diceRoll == 2:
                     return False
 
+        # Checks pokemon speed to determine order
+        def checkSpeedMulti(self, ally, target, target2):
+            speeds = [self.speed, ally.speed, target.speed, target2.speed]
+            speeds.sort()
+            return speeds
+                
         # function for potion use. 1 = normal, 2 is super, and 3 is hyper
         def usePotion(self, type):
             if type == 1:
@@ -99,13 +128,17 @@ init -2 python:
             #print("Move type is %s" % pokemon_types[move.type])
             #print("Target type is %s" % target.type1)
             #print("Target type is %s" % target.type2)
-            #if(dmgMod > 1):
-                #print("It's super effective!")
-            #elif(dmgMod < 1):
-                #print("It's not very effective...")
             #print("%f" % dmgMod)
             #print("The move type is: %d")
             return self.dmgMod
+
+        def effectiveMessage(self, move):
+            if self.isCrit == True:
+                renpy.say(n, "Critical strike!")
+            if(self.dmgMod > 1 and move.effect == 0):
+                renpy.say(n, "It's super effective!")
+            elif(self.dmgMod < 1 and move.effect == 0):
+                renpy.say(n, "It's not very effective...")
 
         # If the move type is the same as one of the pokemon's two types, gives an additional damage multiplier
         def sameTypeBonus(self, move):
@@ -132,11 +165,26 @@ init -2 python:
                 self.isCrit = True
                 #print("Critical strike!")
                 return 2
+                
+        # Determining end of turn messages
+        def endTurn(self):
+            if self.status == 2:
+                renpy.say(n, self.name + " is inflicted by poison!")
+                self.poison()
+            if self.status == 3:
+                renpy.say(n, self.name + " is inflicted by burn!")
+                self.burn()
+            if self.status == 4:
+                call .fight
+                renpy.say(n, self.name + " is badly poisoned!")
+                self.toxic()
+            if self.status == 6:
+                self.currSpeed *= curr.speed * 0.5
             
         # Function for attacking enemy. Uses a 1:1 formula with the actual Pokemon damage formula, making attacks
         # 100% identical to their official game counterparts. Also can apply effects, such as defense down, poison,
         # etc
-        def attack(self, move, target):
+        def attack(self, move, target, trainer=""):
             # Checks if move deals damage and/or causes an effect
             if move.damage > 0:
                 level = self.lvl
@@ -156,14 +204,19 @@ init -2 python:
                 self.dam = damage
                 # Subtracts opposing pokemon's HP
                 target.currHP -= damage
-                # If move has effect, deals it. Otherwise, does nothing
-                move.determineEffect(target)
+                if trainer != None:
+                    move.determineEffect(target, self, trainer)
+                else:
+                    move.determineEffect(target, self, None)
                 #print("%d/%d" % (target.currHP, target.maxHP))
             # Checks if move just causes an effect
             elif move.damage == 0:
                 self.isCrit = False
                 self.dmgMod = 0
-                move.determineEffect(target)
+                if trainer != None:
+                    move.determineEffect(target, self, trainer)
+                else:
+                    move.determineEffect(target, self, None)
                 
         def sleep(self):
             if self.status == 1:
@@ -208,32 +261,364 @@ init -2 python:
 
     class Moves(object):
 
-        def __init__(self, name, pp, type, spec, damage, accuracy, effect):
+        def __init__(self, name, type, spec, damage, accuracy, effect, multi=0, priority=0):
             self.name = name
-            self.pp = pp
             self.type = type
             self.spec = spec
             self.damage = damage
             self.accuracy = accuracy
             self.effect = effect
+            self.multi = multi
+            self.priority = priority
 
-        def determineEffect(self, target):
+        def determineEffect(self, target, atker, trainer=""):
+            ## Minor Stat Reductions
+            # Def
             if self.effect == 1:
                 if target.currPDef > target.pDef - 6:
                     target.currPDef -= 1
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s defense fell!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "'s defense fell!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s defense stat won't go any lower!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "s's defense stat won't go any lower!")
+            # Atk            
             elif self.effect == 2:
                 if target.currPAtk > target.pAtk - 6:
-                    target.currpAtk -= 1
+                    target.currPAtk -= 1
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s attack fell!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "'s attack fell!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s attack stat won't go any lower!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "s's attack stat won't go any lower!")
+            # S Def        
             elif self.effect == 3:
                 if target.currSDef > target.sDef - 6:
                     target.currSDef -= 1
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s sp. defense fell!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "'s sp. defense fell!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s sp. defense stat won't go any lower!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "s's sp. defense stat won't go any lower!")
+            # S Atk        
             elif self.effect == 4:
                 if target.currSAtk > target.sAtk - 6:
                     target.currSAtk -= 1
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s sp. attack fell!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "'s sp. attack fell!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s sp. attack stat won't go any lower!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "s's sp. attack stat won't go any lower!")
+            # Speed            
             elif self.effect == 5:
                 if target.currSpeed > target.speed - 6:
                     target.currSpeed -= 1
-
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s speed fell!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "'s speed fell!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s speed stat won't go any lower!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "s's speed stat won't go any lower!")
+                        
+            ## Major Stat Reductions
+            # Def
+            elif self.effect == 6:
+                if target.currPDef > target.pDef - 6:
+                    target.currPDef -= 2
+                    if target.currPDef < target.pDef - 6:
+                        target.currPDef += 1
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s defense fell greatly!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "'s defense fell greatly!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s defense stat won't go any lower!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "s's defense stat won't go any lower!")
+            #Atk
+            elif self.effect == 7:
+                if target.currPAtk > target.pAtk - 6:
+                    target.currPAtk -= 2
+                    if target.currPAtk < target.pAtk - 6:
+                        target.currPAtk += 1
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s attack fell greatly!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "'s attack fell greatly!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s attack stat won't go any lower!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "s's attack stat won't go any lower!")
+            # S. Def
+            elif self.effect == 8:
+                if target.currSDef > target.sDef - 6:
+                    target.currSDef -= 2
+                    if target.currSDef < target.sDef - 6:
+                        target.currSDef += 1
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s sp. defense fell greatly!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "'s sp. defense fell greatly!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s sp. defense stat won't go any lower!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "s's sp. defense stat won't go any lower!")
+            # S. Atk
+            elif self.effect == 9:
+                if target.currSAtk > target.sAtk - 6:
+                    target.currSAtk -= 2
+                    if target.currSAtk < target.sAtk - 6:
+                        target.currSAtk += 1
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s sp. attack fell greatly!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "'s sp. attack fell greatly!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s sp. attack stat won't go any lower!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "s's sp. attack stat won't go any lower!")
+            # Speed
+            elif self.effect == 10:
+                if target.currSpeed > target.speed - 6:
+                    target.currSpeed -= 2
+                    if target.currSpeed < target.speed - 6:
+                        target.currSpeed += 1
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s speed fell greatly!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "'s speed fell greatly!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, target.name + "'s speed stat won't go any lower!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "s's speed stat won't go any lower!")
+            ## Minor Stat Improvement
+            # def
+            if self.effect == 11:
+                if atker.currPDef < atker.pDef + 6:
+                    atker.currPDef += 1
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s defense grew!")
+                    else:
+                        renpy.say(n, atker.name + "'s defense grew!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s defense won't go any higher!")
+                    else:
+                        renpy.say(n, atker.name + "'s defense won't go any higher!")
+            # atk
+            elif self.effect == 12:
+                if atker.currPAtk < atker.pAtk + 6:
+                    atker.currPAtk += 1
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s attack grew!")
+                    else:
+                        renpy.say(n, atker.name + "'s attack grew!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s attack won't go any higher!")
+                    else:
+                        renpy.say(n, atker.name + "'s attack won't go any higher!")
+            # s def
+            elif self.effect == 13:
+                if atker.currSDef < atker.sDef + 6:
+                    atker.currSDef += 1
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s sp. defense grew!")
+                    else:
+                        renpy.say(n, atker.name + "'s sp. defense grew!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s sp. defense won't go any higher!")
+                    else:
+                        renpy.say(n, atker.name + "'s sp. defense won't go any higher!")
+            # s atk
+            elif self.effect == 14:
+                if atker.currSAtk < atker.sAtk + 6:
+                    atker.currSAtk += 1
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s sp. attack grew!")
+                    else:
+                        renpy.say(n, atker.name + "'s sp. attack grew!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s sp. attack won't go any higher!")
+                    else:
+                        renpy.say(n, atker.name + "'s sp. attack won't go any higher!")
+            # speed
+            elif self.effect == 15:
+                if atker.currSpeed < atker.speed + 6:
+                    atker.currSpeed += 1
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s speed grew!")
+                    else:
+                        renpy.say(n, atker.name + "'s speed grew!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s speed won't go any higher!")
+                    else:
+                        renpy.say(n, atker.name + "'s speed won't go any higher!")
+            ## Major Stat Improvement
+            # def
+            elif self.effect == 16:
+                if atker.currPDef < atker.pDef + 6:
+                    atker.currPDef += 2
+                    if atker.currPDef > atker.pDef + 6:
+                        atker.currPDef -= 1
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s defense grew greatly!")
+                    else:
+                        renpy.say(n, atker.name + "'s defense grew greatly!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s defense won't go any higher!")
+                    else:
+                        renpy.say(n, atker.name + "'s defense won't go any higher!")
+            # atk
+            elif self.effect == 17:
+                if atker.currPAtk < atker.pAtk + 6:
+                    atker.currPAtk += 2
+                    if atker.currPAtk > atker.pAtk + 6:
+                        atker.currPAtk -= 1
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s attack grew greatly!")
+                    else:
+                        renpy.say(n, atker.name + "'s attack grew greatly!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s attack won't go any higher!")
+                    else:
+                        renpy.say(n, atker.name + "'s attack won't go any higher!")
+            # s def
+            elif self.effect == 18:
+                if atker.currSDef < atker.sDef + 6:
+                    atker.currSDef += 2
+                    if atker.currSDef > atker.sDef + 6:
+                        atker.currSDef -= 1
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s sp. defense grew greatly!")
+                    else:
+                        renpy.say(n, atker.name + "'s sp. defense grew greatly!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s sp. defense won't go any higher!")
+                    else:
+                        renpy.say(n, atker.name + "'s sp. defense won't go any higher!")
+            # s atk
+            elif self.effect == 19:
+                if atker.currSAtk < atker.sAtk + 6:
+                    atker.currSAtk += 2
+                    if atker.currSAtk > atker.sAtk + 6:
+                        atker.currSAtk -= 1
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s sp. attack grew greatly!")
+                    else:
+                        renpy.say(n, atker.name + "'s sp. attack grew greatly!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s sp. attack won't go any higher!")
+                    else:
+                        renpy.say(n, atker.name + "'s sp. attack won't go any higher!")
+            # speed
+            elif self.effect == 20:
+                if atker.currSpeed < atker.speed + 6:
+                    atker.currSpeed += 2
+                    if atker.currSpeed > atker.speed + 6:
+                        atker.currSpeed -= 1
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s speed grew greatly!")
+                    else:
+                        renpy.say(n, atker.name + "'s speed grew greatly!")
+                else:
+                    if trainer == "enem": 
+                        renpy.say(n, "Enemy " + atker.name + "'s speed won't go any higher!")
+                    else:
+                        renpy.say(n, atker.name + "'s speed won't go any higher!")
+            # sleep
+            elif self.effect == 21:
+                if target.status == 0:
+                    target.status = 1
+                    if trainer == "enem":
+                        renpy.say(n, target.name + "'s fallen asleep!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "'s fallen asleep!")
+                else:
+                    renpy.say(n, "But it failed!")
+            # poision
+            elif self.effect == 22:
+                if target.status == 0:
+                    target.status = 2
+                    if trainer == "enem":
+                        renpy.say(n, target.name + " is now poisoned!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + " is now poisoned!")
+                else:
+                    renpy.say(n, "But it failed!")
+            # burn
+            elif self.effect == 23:
+                if target.status == 0:
+                    target.status = 3
+                    if trainer == "enem":
+                        renpy.say(n, target.name + " is burned!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + " is burned!")
+                else:
+                    renpy.say(n, "But it failed!")
+            # bad poison
+            elif self.effect == 24:
+                if target.status == 0:
+                    target.status = 4
+                    if trainer == "enem":
+                        renpy.say(n, target.name + "'s is now badly poisoned!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "'s is now badly poisoned!")
+                else:
+                    renpy.say(n, "But it failed!")
+            # freeze
+            elif self.effect == 25:
+                if target.status == 0:
+                    target.status = 5
+                    if trainer == "enem":
+                        renpy.say(n, target.name + "'s fallen asleep!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "'s fallen asleep!")
+                else:
+                    renpy.say(n, "But it failed!")
+            # paralysis
+            elif self.effect == 26:
+                if target.status == 0:
+                    target.status = 6
+                    if trainer == "enem":
+                        renpy.say(n, target.name + "'s fallen asleep!")
+                    else:
+                        renpy.say(n, "Enemy " + target.name + "'s fallen asleep!")
+                else:
+                    renpy.say(n, "But it failed!")
+                    
+                    
     class Trainer(object):
         def __init__(self, name, ID):
             self.name = name
@@ -301,7 +686,7 @@ init -2 python:
         
     def stats_frame(name, level, hp, maxhp, **properties):
 
-        ui.frame(xfill=False, yminimum=0, **properties)
+        ui.frame(xfill=False, yminimum=0, xminimum=280,**properties)
         ui.hbox() # (name, "HP", bar) from (level, hp, maxhp)
         ui.vbox() # name from ("HP", bar)
 
@@ -321,6 +706,16 @@ init -2 python:
 
         ui.close()
         ui.close()
+
+
+    def face_frame(name, **properties):
+
+        ui.frame(xfill=False, **properties)
+        ui.hbox()
+        ui.image(name);
+        ui.close()
+        
+
     ## Old classes previously used for party management. Now this information is stored in the "Trainer" class. A lot
     ## of functions have been ported over to the new class
     ##
@@ -350,3 +745,60 @@ init -2 python:
 
             
 
+##EFFECTS KEY:
+
+##0: Default
+
+##1: -1 Def
+
+##2: -1 Atk
+
+##3: -1 S. Def
+
+##4: -1 S. Atk
+
+##5: -1 Speed
+
+##6: -2 Def
+
+##7: -2 Atk
+
+##8: -2 S. Def
+
+##9: -2 S. Atk
+
+##10: -2 Speed
+
+##11: +1 Def
+
+##12: +1 Atk
+
+##13: +1 S. Def
+
+##14: +1 S. Atk
+
+##15: +1 Speed
+
+##16: +2 Def
+
+##17: +2 Atk
+
+##18: +2 S. Def
+
+##19: +2 S. Atk
+
+##20: +2 Speed
+
+##21: sleep
+
+##22: poison
+
+##23: burn
+
+##24: bad poison
+
+##25: freeze
+
+##26: paralysis
+
+##27: other

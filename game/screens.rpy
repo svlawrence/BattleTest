@@ -1456,6 +1456,114 @@ style slider_pref_slider:
     variant "small"
     xsize 600
 
+screen pstats(name, level, hp, maxhp, xposi, yposi):
 
+    $ strHP = '%d' % hp
+    $ strMax = '%d' % maxhp
+    frame:
+        xfill False
+        yminimum 0
+        xminimum 280
+        xalign xposi
+        yalign yposi
 
+        hbox:
+            vbox:
+                text "[name]" size 20
 
+                hbox:
+                    text "HP" size 20
+                    bar value StaticValue(hp, maxhp):
+                        xmaximum 150
+
+            vbox:
+                text "Lv. [level]" ##xalign 0.5 size 20
+                text "[strHP]/[strMax]" ##xalign 0.5 size 20
+                
+screen allystats(name, level, hp, maxhp, xposi, yposi):
+
+    $ strHP = '%d' % hp
+    $ strMax = '%d' % maxhp
+    frame:
+        xfill False
+        yminimum 0
+        xminimum 280
+        xalign xposi
+        yalign yposi
+
+        hbox:
+            vbox:
+                text "[name]" size 20
+
+                hbox:
+                    text "HP" size 20
+                    bar value StaticValue(hp, maxhp):
+                        xmaximum 150
+
+            vbox:
+                text "Lv. [level]" ##xalign 0.5 size 20
+                text "[strHP]/[strMax]" ##xalign 0.5 size 20
+
+screen estats(name, level, hp, maxhp, xposi, yposi):
+
+    $ strHP = '%d' % hp
+    $ strMax = '%d' % maxhp
+    frame:
+        xfill False
+        yminimum 0
+        xminimum 280
+        xalign xposi
+        yalign yposi
+
+        hbox:
+            vbox:
+                text "[name]" size 20
+
+                hbox:
+                    text "HP" size 20
+                    bar value StaticValue(hp, maxhp):
+                        xmaximum 150
+
+            vbox:
+                text "Lv. [level]" ##xalign 0.5 size 20
+                text "[strHP]/[strMax]" ##xalign 0.5 size 20
+                
+screen doubleEstats(name, level, hp, maxhp, xposi, yposi):
+
+    $ strHP = '%d' % hp
+    $ strMax = '%d' % maxhp
+    frame:
+        xfill False
+        yminimum 0
+        xminimum 280
+        xalign xposi
+        yalign yposi
+
+        hbox:
+            vbox:
+                text "[name]" size 20
+
+                hbox:
+                    text "HP" size 20
+                    bar value StaticValue(hp, maxhp):
+                        xmaximum 150
+
+            vbox:
+                text "Lv. [level]" ##xalign 0.5 size 20
+                text "[strHP]/[strMax]" ##xalign 0.5 size 20
+
+screen pface(path, xposi, yposi):
+    frame:
+        xfill False
+        xalign xposi
+        yalign yposi
+        hbox:
+            image path
+
+screen eface(path, xposi, yposi):
+    frame:
+        xfill False
+        xalign xposi
+        yalign yposi
+        hbox:
+            image path

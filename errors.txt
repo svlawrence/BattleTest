@@ -2,16 +2,6 @@
 errors listed below, and try again.
 
 
-File "game/combatsystem.rpy", line 429: expected statement.
-    Red.party[currPoke].poison()
-                                ^
-
-File "game/combatsystem.rpy", line 433: expected statement.
-    Red.party[currPoke].burn()
-                              ^
-
-File "game/combatsystem.rpy", line 437: expected statement.
-    Red.party[currPoke].toxic()
-                               ^
+File "game/Pokemon.rpy", line 538: can't assign to operator
 
 Ren'Py Version: Ren'Py 6.99.12.4.2187
